@@ -1,6 +1,6 @@
 // routes/user.route.js
 const express = require('express');
-const { register, login, getCurrentUser, getAllUsers, updateProfile,forgotPassword, resetPassword, createCommentAndRate, deleteCommentAndRate} = require('../controllers/userController');
+const { register, login, getCurrentUser, getAllUsers, updateProfile,forgotPassword, createCommentAndRate, deleteCommentAndRate,purchaseGame} = require('../controllers/userController');
 const auth = require('../middleware/auth');
 const roleAuth = require('../middleware/roleAuth');
 const router = express.Router();
@@ -28,6 +28,7 @@ router.delete('/commendAndRate/:commentId', auth, roleAuth(['user']), deleteComm
 
 // Reset password
 router.post('/forgot-password', forgotPassword);
-router.post('/reset-password/:token', resetPassword);
 
+// Buy a game
+router.post('/orders/:gameId', auth, roleAuth(['user']), purchaseGame);
 module.exports = router;

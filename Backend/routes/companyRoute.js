@@ -2,7 +2,7 @@
 const express = require('express');
 const auth = require('../middleware/auth');
 const roleAuth = require('../middleware/roleAuth');
-const { register, login, getCurrentCompany, getAllCompanies, updateCompanyProfile,forgotPassword,resetPassword } = require('../controllers/companyController');
+const { register, login, getCurrentCompany, getAllCompanies, updateCompanyProfile,forgotPassword } = require('../controllers/companyController');
 const router = express.Router();
 
 // Company registration
@@ -22,6 +22,5 @@ router.patch('/profile', auth, roleAuth(['company']), updateCompanyProfile);
 
 // Reset password
 router.post('/forgot-password', forgotPassword);
-router.post('/reset-password/:token', resetPassword);
 
 module.exports = router; // Export the router

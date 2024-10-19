@@ -1,18 +1,29 @@
 // controllers/user.controller.js
 
-// External modules
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
-// Internal modules
 const { Comment } = require('../models/comment');
 const Game = require('../models/game');
 const User = require('../models/user');
 const { RegisterDto } = require('../dtos/registerDto');
 const { UserDto } = require('../dtos/userDto');
+const Purchase = require ('../models/purchase');
 
 // User registration
 const register = async (req, res) => {
     try {
+        const { email, password, confirmPassword } = req.body;
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: 'Passwords do not match' });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+
         const user = new User(req.body);
         await user.save();
 
@@ -28,23 +39,41 @@ const register = async (req, res) => {
 // User login
 const login = async (req, res) => {
     try {
-        const user = await User.findOne({ email: req.body.email });
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+
+        const user = await User.findOne({ email });
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        const isPasswordValid = await user.checkPassword(req.body.password);
+        const isPasswordValid = await user.checkPassword(password);
+
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        // Check if it's a temporary password and if it has expired
+        if (user.resetPasswordExpires) {
+            if (user.resetPasswordExpires < Date.now()) {
+                return res.status(401).json({ message: 'Temporary password has expired. Please use the forgot password feature to get a new one.' });
+            }
         }
 
         const token = user.generateAuthToken();
         const userDto = new UserDto(user);
 
-        res.status(200).json({ user: userDto, token });
+        res.status(200).json({ 
+            user: userDto, 
+            token
+                });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'An error occurred during login', error: error.message });
     }
 };
 
@@ -64,12 +93,17 @@ const updateProfile = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        if (req.body.password && req.body.password !== req.body.confirmPassword) {
-            return res.status(400).json({ message: 'New password and confirmation do not match!' });
+        if (req.body.password) {
+            if (req.body.password !== req.body.confirmPassword) {
+                return res.status(400).json({ message: 'New password and confirmation do not match!' });
+            }
+            user.password = req.body.password; 
         }
 
-        updates.forEach(async (update) => {
-            user[update] = (update === 'password') ? await bcrypt.hash(req.body[update], 8) : req.body[update];
+        updates.forEach((update) => {
+            if (update !== 'confirmPassword') {
+                user[update] = req.body[update];
+            }
         });
 
         await user.save();
@@ -85,14 +119,16 @@ const updateProfile = async (req, res) => {
 
 // Get current user info
 const getCurrentUser = (req, res) => {
-    res.status(200).json(req.user);
+    const userDto = new UserDto(req.user);
+    res.status(200).json(userDto);
 };
 
-// Get all users
+// Get all users (consider adding pagination)
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
-        res.status(200).json(users);
+        const users = await User.find().select('-password');
+        const userDtos = users.map(user => new UserDto(user));
+        res.status(200).json(userDtos);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -102,15 +138,33 @@ const getAllUsers = async (req, res) => {
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
         const user = await User.findOne({ email });
 
         if (!user) {
             return res.status(404).json({ message: 'User with this email does not exist' });
         }
 
-        const resetToken = user.generateResetPasswordToken();
+        // Generate a random temporary password
+        const temporaryPassword = crypto.randomBytes(2).toString('hex');
+        
+        console.log('Temporary password generated:', temporaryPassword); // For debugging
+
+        if (!temporaryPassword) {
+            throw new Error('Failed to generate temporary password');
+        }
+
+        // Update user's password in the database
+        user.password = temporaryPassword;
+        user.resetPasswordExpires = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // 31 days from now
+
         await user.save();
 
+        // Email sending logic
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -119,46 +173,19 @@ const forgotPassword = async (req, res) => {
             },
         });
 
-        const resetUrl = `http://${req.headers.host}/api/users/reset-password/${resetToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: user.email,
-            subject: 'Password Reset',
-            text: `Please click the following link to reset your password: ${resetUrl}`,
+            subject: 'Temporary Password',
+            text: `Your temporary password is: ${temporaryPassword}\nThis password will be valid for 31 days. Please log in and change your password as soon as possible.`,
         };
 
         await transporter.sendMail(mailOptions);
 
-        res.status(200).json({ message: 'Reset email sent' });
+        res.status(200).json({ message: 'Temporary password sent to your email' });
     } catch (error) {
-        res.status(500).json({ message: 'Error sending email' });
-    }
-};
-
-// Reset password
-const resetPassword = async (req, res) => {
-    try {
-        const { token } = req.params;
-        const { password } = req.body;
-
-        const user = await User.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() },
-        });
-
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
-        }
-
-        user.password = await bcrypt.hash(password, 8);
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-
-        await user.save();
-
-        res.status(200).json({ message: 'Password reset successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Password reset failed' });
+        console.error('Error in forgotPassword:', error);
+        res.status(500).json({ message: 'Error processing request', error: error.message });
     }
 };
 
@@ -178,22 +205,21 @@ const createCommentAndRate = async (req, res) => {
             return res.status(404).json({ message: 'Game not found' });
         }
 
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+        const existingComment = await Comment.findOne({ user: userId, game: gameId });
+        if (existingComment) {
+            return res.status(400).json({ message: 'You have already commented on this game' });
         }
 
         const newComment = new Comment({ user: userId, game: gameId, comment, rating });
         await newComment.save();
 
         game.comments.push(newComment._id);
-        user.comments.push(newComment._id);
+        await User.findByIdAndUpdate(userId, { $push: { comments: newComment._id } });
 
         const allComments = await Comment.find({ game: gameId });
         game.averageRating = allComments.reduce((sum, comment) => sum + comment.rating, 0) / allComments.length;
 
         await game.save();
-        await user.save();
 
         res.status(201).json({ message: 'Comment and rating added successfully', comment: newComment });
     } catch (error) {
@@ -227,7 +253,114 @@ const deleteCommentAndRate = async (req, res) => {
     }
 };
 
-// Export the controller methods
+const purchaseGame = async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const userId = req.user._id;
+
+        // Find the game
+        const game = await Game.findById(gameId);
+        if (!game) {
+            return res.status(404).json({ message: 'Game not found' });
+        }
+
+        // Check if user already owns the game
+        const user = await User.findById(userId);
+        if (user.purchasedGames.includes(gameId)) {
+            return res.status(400).json({ message: 'You already own this game' });
+        }
+
+        // Check if user has stored payment information
+        const hasStoredPaymentInfo = user.cardNumber && user.cardExpiration && user.cardCVV;
+        
+        // Initialize payment info
+        let paymentInfo;
+
+        if (hasStoredPaymentInfo) {
+            // Use stored payment information
+            paymentInfo = {
+                cardNumber: user.cardNumber,
+                cardExpiration: user.cardExpiration,
+                cardCVV: user.cardCVV
+            };
+        } else {
+            // If no stored payment info, require new payment information
+            const { cardNumber, cardExpiration, cardCVV } = req.body;
+            
+            if (!cardNumber || !cardExpiration || !cardCVV) {
+                return res.status(400).json({ 
+                    message: 'No stored payment information found. Please provide card details.',
+                    requiredFields: ['cardNumber', 'cardExpiration', 'cardCVV']
+                });
+            }
+
+            paymentInfo = { cardNumber, cardExpiration, cardCVV };
+        }
+
+        // Validate card info format (whether stored or new)
+        const cardNumberRegex = /^\d{16}$/;
+        const cardExpirationRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+        const cardCVVRegex = /^\d{3,4}$/;
+
+        if (!cardNumberRegex.test(paymentInfo.cardNumber)) {
+            return res.status(400).json({ message: 'Invalid card number format' });
+        }
+
+        if (!cardExpirationRegex.test(paymentInfo.cardExpiration)) {
+            return res.status(400).json({ message: 'Invalid card expiration format (MM/YYYY)' });
+        }
+
+        if (!cardCVVRegex.test(paymentInfo.cardCVV)) {
+            return res.status(400).json({ message: 'Invalid CVV format' });
+        }
+
+        // Create purchase record
+        const purchase = new Purchase({
+            user: userId,
+            game: gameId,
+            amount: game.price,
+            purchaseDate: new Date(),
+            paymentStatus: 'completed',
+            paymentMethod: hasStoredPaymentInfo ? 'stored_card' : 'new_card'
+        });
+
+        await purchase.save();
+
+        // Add game to user's purchased games and remove from wishlist
+        await User.findByIdAndUpdate(
+            userId,
+            { 
+                $addToSet: { purchasedGames: gameId },
+                $pull: { wishlist: gameId }
+            }
+        );
+
+        // Update game purchase count
+        await Game.findByIdAndUpdate(
+            gameId,
+            { $inc: { purchases: 1 } }
+        );
+
+        res.status(200).json({
+            message: 'Game purchased successfully',
+            purchase: {
+                gameId: game._id,
+                gameName: game.title,
+                price: game.price,
+                purchaseDate: purchase.purchaseDate,
+                paymentMethod: hasStoredPaymentInfo ? 'Used stored card' : 'Used new card'
+            }
+        });
+
+    } catch (error) {
+        console.error('Purchase error:', error);
+        res.status(500).json({ 
+            message: 'An error occurred during purchase',
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -235,7 +368,7 @@ module.exports = {
     getAllUsers,
     updateProfile,
     forgotPassword,
-    resetPassword,
     createCommentAndRate,
     deleteCommentAndRate,
+    purchaseGame,
 };

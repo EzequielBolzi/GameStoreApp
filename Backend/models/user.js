@@ -19,7 +19,6 @@ const UserSchema = new mongoose.Schema({
   purchasedGames: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],
   createdAt: { type: Date, default: Date.now },
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-  resetPasswordToken: {type: String},
   resetPasswordExpires: {type: Date}
 });
 
@@ -40,12 +39,7 @@ UserSchema.methods.generateAuthToken = function() {
   };
 
 
-UserSchema.methods.generateResetPasswordToken = function() {
-    const resetToken = jwt.sign({ _id: this._id }, process.env.JWT_RESET_SECRET, { expiresIn: '1h' });
-    this.resetPasswordToken = resetToken;
-    this.resetPasswordExpires = Date.now() + 3600000; // 1 hora
-    return resetToken;
-  };
+
 
 const User = mongoose.model('User', UserSchema);
 

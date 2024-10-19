@@ -82,63 +82,54 @@ const updateCompanyProfile = async (req, res) => {
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await Company.findOne({ email });
 
-        if (!user) {
-            return res.status(404).json({ message: 'There is no user with that email address.' });
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
         }
 
-        const resetToken = user.generateResetPasswordToken();
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User with this email does not exist' });
+        }
+
+        // Generate a random temporary password
+        const temporaryPassword = crypto.randomBytes(2).toString('hex');
+        
+        console.log('Temporary password generated:', temporaryPassword); // For debugging
+
+        if (!temporaryPassword) {
+            throw new Error('Failed to generate temporary password');
+        }
+
+        // Update user's password in the database
+        user.password = temporaryPassword;
+        user.resetPasswordExpires = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // 31 days from now
+
         await user.save();
 
-        // Configurar el transporter de nodemailer (ajusta según tu proveedor de correo)
-        let transporter = nodemailer.createTransport({
+        // Email sending logic
+        const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
+                pass: process.env.EMAIL_PASS,
+            },
         });
 
-        const resetUrl = `http://${req.headers.host}/api/companies/reset-password/${resetToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: user.email,
-            subject: 'Password reset',
-            text: `You have requested to reset your password. Please click on the following link to reset your password: ${resetUrl}`
+            subject: 'Temporary Password',
+            text: `Your temporary password is: ${temporaryPassword}\nThis password will be valid for 31 days. Please log in and change your password as soon as possible.`,
         };
 
         await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'Mail sent' });
+
+        res.status(200).json({ message: 'Temporary password sent to your email' });
     } catch (error) {
-        console.error("Error sending email:", error);
-        res.status(500).json({ message: 'Error sending reset email' });
-    }
-};
-
-// Reset password
-const resetPassword = async (req, res) => {
-    try {
-        const { token } = req.params;
-        const { password } = req.body;
-
-        const user = await Company.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
-        }
-
-        user.password = password;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        await user.save();
-
-        res.status(200).json({ message: 'Password reset successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Password reset failed' });
+        console.error('Error in forgotPassword:', error);
+        res.status(500).json({ message: 'Error processing request', error: error.message });
     }
 };
 
@@ -150,5 +141,4 @@ module.exports = {
     getAllCompanies,
     updateCompanyProfile,
     forgotPassword,
-    resetPassword,
 };
