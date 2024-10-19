@@ -361,6 +361,80 @@ const purchaseGame = async (req, res) => {
     }
 };
 
+// Add game to wishlist
+const addGameToWishlist = async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const userId = req.user._id;
+
+        // Check if the game exists
+        const game = await Game.findById(gameId);
+        if (!game) {
+            return res.status(404).json({ message: 'Game not found' });
+        }
+
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the game is already in wishlist or purchased
+        if (user.wishlist.includes(gameId) || user.purchasedGames.includes(gameId)) {
+            return res.status(400).json({ message: 'You have already added this game to your wishlist or already purchased it' });
+        }
+
+        // Add the game to wishlist
+        user.wishlist.push(gameId);
+        game.wishlistCount = (game.wishlistCount || 0) + 1; 
+        await user.save();
+        await game.save(); 
+
+        return res.status(200).json({ message: 'Game added to wishlist successfully' });
+    } catch (error) {
+        console.error('Error adding game to wishlist:', error); 
+        return res.status(500).json({ message: 'An error occurred', error: error.message }); 
+    }
+};
+// Remove game from wishlist
+const removeGameFromWishlist = async (req, res) => {
+    try {
+        const { gameId } = req.params;
+        const userId = req.user._id;
+
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the game is in the wishlist
+        if (!user.wishlist.includes(gameId)) {
+            return res.status(400).json({ message: 'Game not found in your wishlist' });
+        }
+
+        // Find the game using the gameId
+        const game = await Game.findById(gameId); // Corrected this line to use gameId
+        if (!game) {
+            return res.status(404).json({ message: 'Game not found' }); // Added this check
+        }
+
+        // Remove the game from wishlist
+        user.wishlist = user.wishlist.filter(id => id.toString() !== gameId);
+        game.wishlistCount = Math.max(game.wishlistCount - 1, 0); 
+        await user.save();
+        await game.save(); 
+
+        return res.status(200).json({ message: 'Game removed from wishlist successfully' });
+    } catch (error) {
+        console.error('Error removing game from wishlist:', error); 
+        return res.status(500).json({ message: 'An error occurred', error: error.message });
+    }
+};
+
+
+
+
 module.exports = {
     register,
     login,
@@ -371,4 +445,6 @@ module.exports = {
     createCommentAndRate,
     deleteCommentAndRate,
     purchaseGame,
+    addGameToWishlist,
+    removeGameFromWishlist,
 };

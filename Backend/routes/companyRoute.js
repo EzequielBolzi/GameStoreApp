@@ -23,4 +23,4 @@ router.patch('/profile', auth, roleAuth(['company']), updateCompanyProfile);
 // Reset password
 router.post('/forgot-password', forgotPassword);
 
-module.exports = router; // Export the router
+module.exports = router; 
