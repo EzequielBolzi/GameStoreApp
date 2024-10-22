@@ -43,16 +43,48 @@ const createGame = async (req, res) => {
     }
 };
 
-// Get all games
+// Get all games with optional filters
 const getAllGames = async (req, res) => {
     try {
-        const games = await Game.find();
+       
+        const query = {};
+
+        // Filter by category
+        if (req.query.category) {
+            query.category = { $regex: new RegExp(req.query.category, 'i') }; // Case-insensitive match
+        }
+
+        // Filter by price range
+        if (req.query.minPrice || req.query.maxPrice) {
+            query.price = {};
+            if (req.query.minPrice) {
+                query.price.$gte = Number(req.query.minPrice);
+            }
+            if (req.query.maxPrice) {
+                query.price.$lte = Number(req.query.maxPrice);
+            }
+        }
+
+        // Filter by system requirements
+        if (req.query.system) {
+            query['minimumRequirements.system'] = { $regex: new RegExp(req.query.system, 'i') };
+        }
+
+        // Filter by language
+        if (req.query.language) {
+            query.language = { $regex: new RegExp(req.query.language, 'i') };
+        }
+
+        // Execute the query with filters
+        const games = await Game.find(query);
+        
         res.json(games);
     } catch (error) {
         console.error('Error retrieving games:', error);
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // Get a specific game by ID
 const getGame = async (req, res) => {
@@ -132,10 +164,42 @@ const deleteGame = async (req, res) => {
     }
 };
 
+const getStatistics = async (req, res) => { 
+    try {
+        const gameId = req.params.id;
+
+        // Find the game by ID
+        const game = await Game.findById(gameId);
+
+        if (!game) {
+            return res.status(404).json({ message: 'Game not found' });
+        }
+        // Check that the authenticated user is the company that created the game
+        if (game.company.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'You are not authorized to view the statistics for this game' });
+        }
+
+        // Calculate the revenue based on the price and purchases
+        const statistics = {
+            revenue: game.revenue, // Virtual field (price * purchases)
+            views: game.views,
+            wishlistCount: game.wishlistCount
+        };
+
+        // Send the statistics as the response
+        res.json(statistics);
+
+    } catch (err) {
+        console.error('Error fetching game statistics:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 module.exports = {
     createGame,
     getAllGames,
     getGame,
     updateGame,
-    deleteGame
+    deleteGame,
+    getStatistics,
 };

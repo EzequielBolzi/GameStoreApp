@@ -5,6 +5,7 @@ const GameSchema = new mongoose.Schema({
     name: { type: String, required: true },
     category: { type: String, required: true },
     description: { type: String, required: true },
+    language: { type: String, required: true },  
     minimumRequirements: {
       system: String,
       processor: String,
@@ -31,6 +32,15 @@ const GameSchema = new mongoose.Schema({
     wishlistCount: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now }
 });
+
+// Virtual field for revenue: purchases * price
+GameSchema.virtual('revenue').get(function() {
+  return this.purchases * this.price;
+});
+
+// Ensure virtuals are included in JSON and object outputs
+GameSchema.set('toJSON', { virtuals: true });
+GameSchema.set('toObject', { virtuals: true });
 
 const Game = mongoose.model('Game', GameSchema);
 module.exports = Game;
