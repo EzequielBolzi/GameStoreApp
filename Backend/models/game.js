@@ -39,8 +39,21 @@ GameSchema.virtual('revenue').get(function() {
 });
 
 // Ensure virtuals are included in JSON and object outputs
-GameSchema.set('toJSON', { virtuals: true });
-GameSchema.set('toObject', { virtuals: true });
+GameSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false, // Hides __v
+  transform: function (doc, ret) {
+    delete ret._id; // Removes _id from the output
+  }
+});
+
+GameSchema.set('toObject', {
+  virtuals: true,
+  versionKey: false, // Hides __v
+  transform: function (doc, ret) {
+    delete ret._id; // Removes _id from the output
+  }
+});
 
 const Game = mongoose.model('Game', GameSchema);
 module.exports = Game;

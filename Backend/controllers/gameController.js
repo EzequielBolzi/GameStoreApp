@@ -89,10 +89,16 @@ const getAllGames = async (req, res) => {
 // Get a specific game by ID
 const getGame = async (req, res) => {
     try {
-        const game = await Game.findById(req.params.id);
+        const game = await Game.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { views: 1 } },
+            { new: true }
+        );
+        
         if (!game) {
             return res.status(404).json({ message: 'Game not found' });
         }
+
 
         res.json(game);
     } catch (error) {

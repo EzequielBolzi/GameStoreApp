@@ -7,6 +7,17 @@ const nodemailer = require('nodemailer');
 // Company registration
 const register = async (req, res) => {
     try {
+        const {email,password, confirmPassword } = req.body;
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: 'Passwords do not match' });
+        }
+
+        const existingUser = await Company.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+
         const company = new Company(req.body);
         await company.save();
         const companyDto = new CompanyDto(company);
