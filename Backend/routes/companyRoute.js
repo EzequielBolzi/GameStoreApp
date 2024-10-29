@@ -15,7 +15,7 @@ router.post('/sessions',login); // Use the login method
 router.get('/me', auth, roleAuth(['company']), getCurrentCompany); // Use the getCurrentCompany method
 
 // Get all companies
-router.get('/', auth, roleAuth(['company']), getAllCompanies); // Añade la ruta para obtener todas las compañías
+router.get('/', auth, getAllCompanies); // Añade la ruta para obtener todas las compañías
 
 router.patch('/profile', auth, roleAuth(['company']), updateCompanyProfile);
 

@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 const { Comment } = require('../models/comment');
-const Game = require('../models/game');
+const { Game, GameView } = require('../models/game');
 const User = require('../models/user');
 const { RegisterDto } = require('../dtos/registerDto');
 const { UserDto } = require('../dtos/userDto');
@@ -314,18 +314,55 @@ const purchaseGame = async (req, res) => {
             return res.status(400).json({ message: 'Invalid CVV format' });
         }
 
+        let purchase;
+
+        if (game.isOnSale) {
+        // Create purchase record with Sale
+        purchase = new Purchase({
+            user: userId,
+            game: gameId,
+            amount: game.salePrice,
+            purchaseDate: new Date(),
+            paymentStatus: 'completed',
+            paymentMethod: hasStoredPaymentInfo ? 'stored_card' : 'new_card'
+        });
+        }
+        else{
         // Create purchase record
-        const purchase = new Purchase({
+        purchase = new Purchase({
             user: userId,
             game: gameId,
             amount: game.price,
             purchaseDate: new Date(),
             paymentStatus: 'completed',
             paymentMethod: hasStoredPaymentInfo ? 'stored_card' : 'new_card'
-        });
-
+        });}
+        
         await purchase.save();
 
+        // Only track views for authenticated users
+        if (req.user) {
+            // Check if the user has already viewed this game
+             const existingView = await GameView.findOne({
+                    game: game._id,
+                    user: req.user._id
+                });
+        
+            // If no existing view is found, create a new one and increment uniqueViews
+            if (!existingView) {
+                await GameView.create({
+                game: game._id,
+                user: req.user._id
+                        });
+        
+            // Increment the uniqueViews counter only for the first-time view
+            await Game.findByIdAndUpdate(
+                    game._id,
+                    { $inc: { uniqueViews: 1 } },
+                    { new: true }
+                    );
+                }
+            }
         // Add game to user's purchased games and remove from wishlist
         await User.findByIdAndUpdate(
             userId,
@@ -336,21 +373,86 @@ const purchaseGame = async (req, res) => {
         );
 
         // Update game purchase count
-        await Game.findByIdAndUpdate(
-            gameId,
-            { $inc: { purchases: 1 } }
-        );
+        let purchaseAmount;
+        if(game.isOnSale){
+            purchaseAmount = game.salePrice; 
+            await Game.findByIdAndUpdate(
+                gameId,
+                {
+                    $inc: { 
+                        revenue: purchaseAmount,
+                        purchases: 1 
+                    }
+                },
+                { new: true }
+            );
+        }
+        else{
+            purchaseAmount = game.price; 
+            await Game.findByIdAndUpdate(
+                gameId,
+                {
+                    $inc: { 
+                        revenue: purchaseAmount,
+                        purchases: 1 
+                    }
+                },
+                { new: true }
+            );
 
+        }
+
+
+        if(game.isOnSale){
         res.status(200).json({
             message: 'Game purchased successfully',
             purchase: {
                 gameId: game._id,
                 gameName: game.title,
-                price: game.price,
+                price: game.salePrice,
                 purchaseDate: purchase.purchaseDate,
                 paymentMethod: hasStoredPaymentInfo ? 'Used stored card' : 'Used new card'
             }
         });
+        }
+        else{
+            res.status(200).json({
+                message: 'Game purchased successfully',
+                purchase: {
+                    gameId: game._id,
+                    gameName: game.title,
+                    price: game.price,
+                    purchaseDate: purchase.purchaseDate,
+                    paymentMethod: hasStoredPaymentInfo ? 'Used stored card' : 'Used new card'
+                }
+            });
+            }
+
+        // Only track views for authenticated users
+        if (req.user) {
+            // Check if the user has already viewed this game
+            const existingView = await GameView.findOne({
+                game: game._id,
+                user: req.user._id
+            });
+
+            // If no existing view is found, create a new one and increment uniqueViews
+            if (!existingView) {
+                await GameView.create({
+                    game: game._id,
+                    user: req.user._id
+                });
+
+                // Increment the uniqueViews counter only for the first-time view
+                await Game.findByIdAndUpdate(
+                    game._id,
+                    { $inc: { uniqueViews: 1 } },
+                    { new: true }
+                );
+            }
+        }
+        // Refresh the game data to get updated view count
+        const updatedGame = await Game.findById(req.params.id);
 
     } catch (error) {
         console.error('Purchase error:', error);

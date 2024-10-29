@@ -10,6 +10,7 @@ class CompanyDto {
       this.address = company.address;
       this.phoneNumber = company.phoneNumber;
       this.createdAt = company.createdAt;
+      this.games = company.games;
     }
   }
 

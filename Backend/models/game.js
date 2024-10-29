@@ -1,43 +1,72 @@
 const mongoose = require('mongoose');
 
-// Game Model
+const GameViewSchema = new mongoose.Schema({
+  game: { type: mongoose.Schema.Types.ObjectId, ref: 'Game' },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  viewedAt: { type: Date, default: Date.now }
+});
+
+// Create a compound index to ensure unique views per user per game
+GameViewSchema.index({ game: 1, user: 1 }, { unique: true });
+
 const GameSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    category: { type: String, required: true },
-    description: { type: String, required: true },
-    language: { type: String, required: true },  
-    minimumRequirements: {
+  name: { type: String, required: true },
+  category: { type: String, required: true },
+  description: { type: String, required: true },
+  language: { type: String, required: true },  
+  minimumRequirements: {
       system: String,
       processor: String,
       memory: String,
       graphics: String,
       directX: String,
       storage: String
-    },
-    recommendedRequirements: {
+  },
+  recommendedRequirements: {
       system: String,
       processor: String,
       memory: String,
       graphics: String,
       directX: String,
       storage: String
-    },
-    price: { type: Number, required: true },
-    company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
-    isPublished: { type: Boolean, default: false },
-    views: { type: Number, default: 0 },
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-    averageRating: { type: Number, default: 0 },
-    purchases: { type: Number, default: 0 },
-    wishlistCount: { type: Number, default: 0 },
-    createdAt: { type: Date, default: Date.now }
+  },
+  price: { type: Number, required: true },
+  discountPercentage: { type: Number },
+  salePrice: { type: Number },
+  saleEndDate: { type: Date },
+  company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+  isPublished: { type: Boolean, default: false },
+  uniqueViews: { type: Number, default: 0 }, 
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+  averageRating: { type: Number, default: 0 },
+  purchases: { type: Number, default: 0 },
+  wishlistCount: { type: Number, default: 0 },
+  revenue: { type: Number, default: 0 }, 
+  createdAt: { type: Date, default: Date.now }
 });
 
-// Virtual field for revenue: purchases * price
-GameSchema.virtual('revenue').get(function() {
-  return this.purchases * this.price;
+//virtual to check if the game is currently on sale
+GameSchema.virtual('isOnSale').get(function() {
+  return this.salePrice && this.saleEndDate && new Date() < this.saleEndDate;
 });
 
+// pre-save middleware to calculate sale price and handle expired sales
+GameSchema.pre('save', function(next) {
+  // Calculate sale price if there's a discount percentage
+  if (this.discountPercentage > 0) {
+    // Round to 2 decimal places
+    this.salePrice = Number((this.price * (1 - this.discountPercentage / 100)).toFixed(2));
+  }
+
+  // Clear sale if it's expired
+  if (this.saleEndDate && new Date() > this.saleEndDate) {
+    this.salePrice = undefined;
+    this.saleEndDate = undefined;
+    this.discountPercentage = undefined;
+  }
+  
+  next();
+});
 // Ensure virtuals are included in JSON and object outputs
 GameSchema.set('toJSON', {
   virtuals: true,
@@ -56,4 +85,6 @@ GameSchema.set('toObject', {
 });
 
 const Game = mongoose.model('Game', GameSchema);
-module.exports = Game;
+const GameView = mongoose.model('GameView', GameViewSchema);
+
+module.exports = { Game, GameView };

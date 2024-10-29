@@ -1,4 +1,5 @@
-const Game = require('../models/game');
+const { Game, GameView } = require('../models/game');
+
 const Company = require('../models/company');
 
 // Create a new game
@@ -89,18 +90,38 @@ const getAllGames = async (req, res) => {
 // Get a specific game by ID
 const getGame = async (req, res) => {
     try {
-        const game = await Game.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { views: 1 } },
-            { new: true }
-        );
-        
+        // Retrieve the game by ID
+        const game = await Game.findById(req.params.id);        
         if (!game) {
             return res.status(404).json({ message: 'Game not found' });
         }
 
+        // Only track views for authenticated users
+        if (req.user) {
+            // Check if the user has already viewed this game
+            const existingView = await GameView.findOne({
+                game: game._id,
+                user: req.user._id
+            });
 
-        res.json(game);
+            // If no existing view is found, create a new one and increment uniqueViews
+            if (!existingView) {
+                await GameView.create({
+                    game: game._id,
+                    user: req.user._id
+                });
+
+                // Increment the uniqueViews counter only for the first-time view
+                await Game.findByIdAndUpdate(
+                    game._id,
+                    { $inc: { uniqueViews: 1 } },
+                    { new: true }
+                );
+            }
+        }
+        // Refresh the game data to get updated view count
+        const updatedGame = await Game.findById(req.params.id);
+        res.json(updatedGame);
     } catch (error) {
         console.error('Error retrieving the game:', error);
         res.status(500).json({ message: error.message });
@@ -173,26 +194,21 @@ const deleteGame = async (req, res) => {
 const getStatistics = async (req, res) => { 
     try {
         const gameId = req.params.id;
-
-        // Find the game by ID
         const game = await Game.findById(gameId);
 
         if (!game) {
             return res.status(404).json({ message: 'Game not found' });
         }
-        // Check that the authenticated user is the company that created the game
+
         if (game.company.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'You are not authorized to view the statistics for this game' });
         }
-
-        // Calculate the revenue based on the price and purchases
         const statistics = {
-            revenue: game.revenue, // Virtual field (price * purchases)
-            views: game.views,
-            wishlistCount: game.wishlistCount
+            revenue: game.revenue,
+            uniqueViews: game.uniqueViews,
+            wishlistCount: game.wishlistCount,
         };
 
-        // Send the statistics as the response
         res.json(statistics);
 
     } catch (err) {
@@ -200,6 +216,100 @@ const getStatistics = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+const setGameSale = async (req, res) => {
+    try {
+        // Check if the authenticated user is a company
+        if (req.user.role !== 'company') {
+            return res.status(403).json({ message: 'Only companies can set game sales' });
+        }
+
+        const game = await Game.findById(req.params.id);
+        if (!game) {
+            return res.status(404).json({ message: 'Game not found' });
+        }
+
+        // Check that the company owns the game
+        if (game.company.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'You are not authorized to set sales for this game' });
+        }
+
+        const { discountPercentage, duration } = req.body;
+
+        // Validate discount percentage
+        if (!discountPercentage || discountPercentage <= 0 || discountPercentage >= 100) {
+            return res.status(400).json({ 
+                message: 'Discount percentage must be between 0 and 100' 
+            });
+        }
+
+        // Validate duration (in days)
+        if (!duration || duration <= 0 || duration > 90) {
+            return res.status(400).json({ 
+                message: 'Sale duration must be between 1 and 90 days' 
+            });
+        }
+
+        // Calculate sale end date
+        const saleEndDate = new Date();
+        saleEndDate.setDate(saleEndDate.getDate() + duration);
+
+        // Update game with sale information
+        game.discountPercentage = discountPercentage;
+        game.saleEndDate = saleEndDate;
+
+        await game.save();
+
+        res.json({
+            message: 'Sale set successfully',
+            game: {
+                ...game.toObject(),
+                isOnSale: game.isOnSale,
+                salePrice: game.salePrice,
+                discountPercentage: game.discountPercentage,
+            }
+        });
+
+    } catch (error) {
+        console.error('Error setting game sale:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const removeSale = async (req, res) => {
+    try {
+        // Check if the authenticated user is a company
+        if (req.user.role !== 'company') {
+            return res.status(403).json({ message: 'Only companies can remove game sales' });
+        }
+
+        const game = await Game.findById(req.params.id);
+        if (!game) {
+            return res.status(404).json({ message: 'Game not found' });
+        }
+
+        // Check that the company owns the game
+        if (game.company.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'You are not authorized to remove sales for this game' });
+        }
+
+        // Remove sale information
+        game.salePrice = undefined;
+        game.saleEndDate = undefined;
+        game.discountPercentage = undefined;
+
+        await game.save();
+
+        res.json({
+            message: 'Sale removed successfully',
+            game: game.toObject()
+        });
+
+    } catch (error) {
+        console.error('Error removing game sale:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 module.exports = {
     createGame,
@@ -208,4 +318,6 @@ module.exports = {
     updateGame,
     deleteGame,
     getStatistics,
+    setGameSale,
+    removeSale,
 };

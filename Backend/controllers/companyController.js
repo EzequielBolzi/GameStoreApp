@@ -2,6 +2,7 @@
 const Company = require('../models/company');
 const { CompanyDto } = require('../dtos/companyDto');
 const { RegisterDto } = require('../dtos/registerDto');
+const { Game } = require('../models/game');
 const nodemailer = require('nodemailer');
 
 // Company registration
@@ -48,8 +49,28 @@ const login = async (req, res) => {
 
 // Get current company info
 const getCurrentCompany = async (req, res) => {
-    const companyDto = new CompanyDto(req.user);
-    res.json(companyDto);
+    try {
+        const games = await Game.find({ company: req.user._id });
+
+        // Calculate all values
+        const totalUniqueView = games.reduce((acc, game) => acc + (game.uniqueViews || 0), 0);
+        const totalRevenue = games.reduce((acc, game) => acc + (game.revenue || 0), 0);
+        const totalWishListAdded = games.reduce((acc, game) => acc + (game.wishlistCount || 0), 0);
+
+        const companyDto = new CompanyDto(req.user);
+        const response = {
+            ...companyDto,
+            totalUniqueView,
+            totalRevenue,
+            totalWishListAdded
+        };
+
+        res.json(response);
+        
+    } catch (error) {
+        console.error('Error fetching company data:', error);
+        res.status(500).json({ message: 'Error fetching company data' });
+    }
 };
 
 // Get all companies

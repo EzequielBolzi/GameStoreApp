@@ -15,7 +15,7 @@ router.post('/sessions',login);
 router.get('/me', auth, roleAuth(['user']), getCurrentUser);
 
 // Get all users
-router.get('/', auth, roleAuth(['user']), getAllUsers); 
+router.get('/', auth, getAllUsers); 
 
 // Update profile
 router.patch('/profile', auth, roleAuth(['user']), updateProfile);
