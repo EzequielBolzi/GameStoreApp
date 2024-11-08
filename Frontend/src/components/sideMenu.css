@@ -1,0 +1,68 @@
+ .sideMenu{
+    width: 22%;
+    height: 100%;
+    padding: 30px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 30px;
+    background: var(--bgColor);
+    box-shadow: 1px 1px 15px rgba(1, 97, 232, 0.1),
+    1px 1px 15px rgba(155, 0, 232, 0.35);
+    display: flex;
+    flex-direction: column;
+    transition: 1s;
+ }
+ .sideMenu .logo {
+    font-family: 'Bauhaus 93';
+    position: relative;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    color: #ffffff;
+    font-size: 1.8em;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.sideMenu .nav {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    gap: 15px;
+    }
+.sideMenu .nav li a {
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 1.2em;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 25px;
+    transition: 0.5s;
+    background: var(--bgColor);
+    border-radius: 20px;
+    padding: 10px 20px;
+    width: 100%;
+    transition: 0.5s;
+    }
+.sideMenu .nav li a:hover,
+.sideMenu .nav li a.active{
+    box-shadow: -5px -5px 15px rgba(1, 97, 232, 0.1),
+    5px 5px 15px rgba(155, 0, 232, 0.35);
+}
+
+.sideMenu.active {
+    width: 7%;
+    transition: 1s;
+    overflow: hidden;
+    align-items: center;
+}
+.sideMenu.active .brand,
+.sideMenu.active .navName {
+    display: none;
+}
+
+.sideMenu.active .nav li a {
+    font-size: 1.8em;
+}
