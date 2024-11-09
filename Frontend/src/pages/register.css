@@ -1,0 +1,216 @@
+/* CSS Reset and Base Styles */
+:root {
+    --primary-color: #4CAF50;
+    --primary-hover: #45a049;
+    --error-color: #dc3545;
+    --success-color: #28a745;
+    --text-color: #333;
+    --border-color: #e0e0e0;
+    --bg-color: #ffffff;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 0.5rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+}
+
+/* Form Container */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+    background-color: var(--bg-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+/* Form Groups */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+/* Labels */
+label {
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+/* Form Controls */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: var(--transition);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Buttons */
+button {
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    width: 100%;
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Validation States */
+.valid,
+.invalid {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.valid {
+    color: var(--success-color);
+}
+
+.invalid {
+    color: var(--error-color);
+}
+
+/* Error Message */
+.errmsg {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--error-color);
+    font-weight: 600;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--error-color);
+}
+
+/* Instructions */
+.instructions {
+    font-size: 0.875rem;
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-top: var(--spacing-sm);
+}
+
+/* Utility Classes */
+.offscreen {
+    position: absolute;
+    left: -9999px;
+}
+
+.hide {
+    display: none;
+}
+
+.line {
+    display: inline-block;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 600px) {
+    :root {
+        --spacing-md: 0.75rem;
+        --spacing-lg: 1rem;
+    }
+
+    form {
+        padding: var(--spacing-md);
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    textarea,
+    button {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 0.625rem 0.875rem;
+    }
+
+    .instructions {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-color: #e0e0e0;
+        --border-color: #404040;
+        --bg-color: #1a1a1a;
+        --shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .instructions {
+        background-color: #2a2a2a;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    textarea {
+        background-color: #2a2a2a;
+    }
+}
+
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}

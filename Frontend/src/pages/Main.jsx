@@ -1,18 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './main.css';
 import SideMenu from "../components/SideMenu";
 import Header from './Header';
 import Home from './Home';
-import gameApi from '../api/gameApi';  // Importing gameApi
+import gameApi from '../api/gameApi'; 
 import Categories from "./Categories";
-import MyLIbrary from "./MyLIbrary";
+import MyLibrary from "./MyLibrary";
 import Cart from "./Cart";
+import useAuth from '../hooks/useAuth';
 
 function Main() {
+    console.log("Entre al")
+    const { auth } = useAuth();  // Añade esto
+    
     const [active, setActive] = useState(false);
-    const [games, setGames] = useState([]);  // State to hold the games
-    const [loading, setLoading] = useState(true);  // Loading state
-    const [error, setError] = useState(null);  // Error state
+    const [games, setGames] = useState([]);  
+    const [loading, setLoading] = useState(true);  
+    const [error, setError] = useState(null);  
 
 
     const homeRef = useRef();
@@ -56,7 +61,9 @@ function Main() {
                 return section;
         })
     }
-
+    useEffect(() => {
+        console.log("Auth in Main:", auth); // Para debug
+    }, [auth]);
     // Fetch the games data once when the component mounts
     useEffect(() => {
         const fetchGames = async () => {
@@ -84,7 +91,7 @@ function Main() {
                 <div className="container-fluid">
                     <Home games={games} loading={loading} error={error}  reference={homeRef}/>
                     <Categories games={games} reference={categoriesRef}/>
-                    <MyLIbrary games={games} reference={libraryRef}/>
+                    <MyLibrary games={games} reference={libraryRef}/>
                     <Cart games={games} reference={cartRef}/>
 
                 </div>

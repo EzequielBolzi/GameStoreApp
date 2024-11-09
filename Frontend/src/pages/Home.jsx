@@ -23,7 +23,7 @@ function Home({ games, loading, error , reference}) {
                 <h2 className="sectionTitle">Games on promotion</h2>
 
               </div>
-              <div className="col-lg-6 d-flex justify-content-end aling-items-center">
+              <div className="col-lg-6 d-flex justify-content-end align-items-center">
                 <a href="#" className="viewMore"> View More games  <i class="bi bi-arrow-right"></i>
                 </a>
               </div>

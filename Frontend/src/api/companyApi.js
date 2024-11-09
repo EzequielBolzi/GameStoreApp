@@ -2,13 +2,13 @@
 import axios from 'axios';
 
 // Set the base URL for your API
-const API_BASE_URL = 'http://localhost:3000/api'; // Adjust the URL as needed
+const API_BASE_URL = 'http://localhost:3000/api/companies'; // Adjust the URL as needed
 
 const companyApi = {
     // Register a new company
     register: async (companyData) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/`, companyData);
+            const response = await axios.post(`${API_BASE_URL}`, companyData);
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error registering company');
@@ -38,7 +38,7 @@ const companyApi = {
     // Get all companies 
     getAllCompanies: async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/companies`);
+            const response = await axios.get(`${API_BASE_URL}`);
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error fetching companies');
@@ -46,7 +46,7 @@ const companyApi = {
     },
     getCompanyById: async (companyId) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/companies/${companyId}`);
+            const response = await axios.get(`${API_BASE_URL}/${companyId}`);
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error fetching company by ID');

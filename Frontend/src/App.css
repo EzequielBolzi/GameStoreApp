@@ -7,25 +7,20 @@
   box-sizing: border-box;
 }
 
-:root{
-  --primary: #0161E8  ;
-  --second: #FF019A ;
+:root {
+  --primary: #0161E8;
+  --second: #FF019A;
   --bgColor: #0d1118;
 }
 
-h1,
-h2,
-h4,
-p{
+h1, h2, h4, p {
   color: #ffffff;
 }
 
-body{
-  position: relative;
-  background: var(--bgColor);
+body {
+  background-color: var(--bgColor);
   font-family: 'Roboto', sans-serif;
-  width: 100%;
-  min-height: 100vh;
-  overflow: hidden;
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
