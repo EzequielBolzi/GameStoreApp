@@ -1,58 +1,14 @@
-// controllers/company.controller.js
 const Company = require('../models/company');
 const { CompanyDto } = require('../dtos/companyDto');
-const { RegisterDto } = require('../dtos/registerDto');
 const { Game } = require('../models/game');
 const nodemailer = require('nodemailer');
 
-// Company registration
-const register = async (req, res) => {
-    try {
-        const {email,password, confirmPassword } = req.body;
-
-        if (password !== confirmPassword) {
-            return res.status(400).json({ message: 'Passwords do not match' });
-        }
-
-        const existingUser = await Company.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email already in use' });
-        }
-
-        const company = new Company(req.body);
-        await company.save();
-        const companyDto = new CompanyDto(company);
-        const registerDto = new RegisterDto(
-            "User registered successfully",
-            companyDto
-        );
-        res.status(201).json(registerDto);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-// Company login
-const login = async (req, res) => {
-    try {
-        const company = await Company.findOne({ email: req.body.email });
-        if (!company || !(await company.checkPassword(req.body.password))) {
-            return res.status(401).json({ error: 'Invalid login credentials' });
-        }
-        const token = company.generateAuthToken();
-        const companyDto = new CompanyDto(company);
-        res.json({ company: companyDto, token });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
 
 // Get current company info
 const getCurrentCompany = async (req, res) => {
     try {
         const games = await Game.find({ company: req.user._id });
 
-        // Calculate all values
         const totalUniqueView = games.reduce((acc, game) => acc + (game.uniqueViews || 0), 0);
         const totalRevenue = games.reduce((acc, game) => acc + (game.revenue || 0), 0);
         const totalWishListAdded = games.reduce((acc, game) => acc + (game.wishlistCount || 0), 0);
@@ -84,29 +40,53 @@ const getAllCompanies = async (req, res) => {
     }
 };
 
-// Update company profile
+// Get a company by ID
+const getCompanyById = async (req, res) => {
+    try {
+        
+        const company = await Company.findById(req.params.id);
+        if (!company) {
+            return res.status(404).json({ message: 'Company not found' });
+        }
+        const companyDto = new CompanyDto(company);
+        res.json(companyDto);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching company data', error: error.message });
+    }
+};
+
 const updateCompanyProfile = async (req, res) => {
     try {
         const updates = req.body;
-        const allowedUpdates = ['companyName', 'country', 'city', 'street', 'address', 'phoneNumber'];
-        const isValidOperation = Object.keys(updates).every(update => allowedUpdates.includes(update));
 
-        if (!isValidOperation) {
-            return res.status(400).json({ error: 'Invalid updates!' });
-        }
 
         const company = await Company.findById(req.user._id);
         if (!company) {
             return res.status(404).json({ error: 'Company not found' });
         }
 
-        Object.keys(updates).forEach(update => company[update] = updates[update]);
-        await company.save();
+        Object.keys(updates).forEach(update => {
+            if (update === 'password' && updates[update] === '') {
+                delete updates[update];
+            } else {
+                company[update] = updates[update];
+            }
+        });
 
-        const companyDto = new CompanyDto(company);
-        res.json(companyDto);
+        try {
+            await company.save();
+            const companyDto = new CompanyDto(company);
+            res.json(companyDto);
+        } catch (error) {
+            console.error('Error saving company:', error);
+            res.status(400).json({ error: error.message });
+        }
+
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error("Unexpected error:", error);
+        if (!res.headersSent) {
+            res.status(400).json({ error: error.message });
+        }
     }
 };
 
@@ -125,7 +105,6 @@ const forgotPassword = async (req, res) => {
             return res.status(404).json({ message: 'User with this email does not exist' });
         }
 
-        // Generate a random temporary password
         const temporaryPassword = crypto.randomBytes(2).toString('hex');
         
         console.log('Temporary password generated:', temporaryPassword); // For debugging
@@ -134,13 +113,11 @@ const forgotPassword = async (req, res) => {
             throw new Error('Failed to generate temporary password');
         }
 
-        // Update user's password in the database
         user.password = temporaryPassword;
         user.resetPasswordExpires = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // 31 days from now
 
         await user.save();
 
-        // Email sending logic
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -165,12 +142,10 @@ const forgotPassword = async (req, res) => {
     }
 };
 
-// Export the controller methods
 module.exports = {
-    register,
-    login,
     getCurrentCompany,
     getAllCompanies,
     updateCompanyProfile,
     forgotPassword,
+    getCompanyById,
 };

@@ -1,15 +1,10 @@
-// routes/user.route.js
 const express = require('express');
-const { register, login, getCurrentUser, getAllUsers, updateProfile,forgotPassword, createCommentAndRate, deleteCommentAndRate,purchaseGame,addGameToWishlist,removeGameFromWishlist} = require('../controllers/userController');
+const { getCurrentUser, getAllUsers, updateProfile,forgotPassword, createCommentAndRate, deleteCommentAndRate,purchaseGame,addGameToWishlist,removeGameFromWishlist} = require('../controllers/userController');
 const auth = require('../middleware/auth');
 const roleAuth = require('../middleware/roleAuth');
 const router = express.Router();
 
-// User registration
-router.post('/', register);
-
-// User login
-router.post('/sessions',login);
+//TODO: Unique route to log in 
 
 // Get current user info
 router.get('/me', auth, roleAuth(['user']), getCurrentUser);

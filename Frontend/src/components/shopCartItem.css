@@ -1,0 +1,29 @@
+.shopCartItem {
+    margin-bottom: 20px;
+    
+}
+
+.shopCartItem tr{
+    margin-bottom: 20px !important; 
+}
+
+.shopCartItem td,
+.shopCartItem th{
+    background: transparent;
+    color: #ffffff;
+    font-size: 1.2rem;
+}
+
+.shopCartItem a {
+    color:#ffffff;
+    font-size: 1.6rem;
+
+}
+
+.shopCartItem img {
+    width: 120px;
+    height: 70px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 10px;
+}

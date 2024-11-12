@@ -1,21 +1,21 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import { useLocation, Navigate, Outlet } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
-const RequireAuth = ({ allowedRoles, children }) => {
-  const { auth } = useAuth();
-  const location = useLocation();
-  console.log("Auth in RequireAuth:", auth); // Para debug
-    console.log("Allowed roles:", allowedRoles); // Para debug
-  // Check if the user is authenticated and their role is in the allowedRoles
-  if (!auth?.role || !allowedRoles.includes(auth.role)) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+const RequireAuth = ({ allowedRoles }) => {
+    const { auth } = useAuth();
+    const location = useLocation();
 
-  if (!auth || !allowedRoles.includes(auth.role)) {
-    return <div>Loading...</div>;  // Optionally show a loading state until redirection happens
-  }
+    console.log('Current auth state:', auth); 
+    console.log('Allowed roles:', allowedRoles); 
+    if (!auth?.accessToken) {
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
 
-  return children;  // Allow access if authentication is valid
+    if (!allowedRoles?.includes(auth?.role)) {
+        return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+    }
+
+    return <Outlet />;
 };
 
 export default RequireAuth;

@@ -13,12 +13,11 @@ const GameList = () => {
     system: ''
   });
 
-  // Fetch games with current filters
   const fetchGames = async () => {
     try {
       setLoading(true);
-      const response = await gameApi.getAllGames(filters);  // Ensure this returns the correct data
-      setGames(response);  // Assuming the response is an array of games
+      const response = await gameApi.getAllGames(filters); 
+      setGames(response);  
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -27,12 +26,10 @@ const GameList = () => {
     }
   };
 
-  // Trigger fetch when filters change
   useEffect(() => {
     fetchGames();
   }, [filters]);
 
-  // Handle filter changes
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
@@ -41,7 +38,6 @@ const GameList = () => {
     }));
   };
 
-  // Render loading, error, or list of games
   if (loading) return <div className="text-center p-4">Loading games...</div>;
   if (error) return <div className="text-red-500 p-4">{error}</div>;
 

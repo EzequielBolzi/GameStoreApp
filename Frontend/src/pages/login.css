@@ -57,7 +57,22 @@ a, a:visited {
   display: inline-block;
   margin-top: 1rem;
 }
+.role-selector {
+  margin-bottom: 1rem;
+}
 
+.role-options {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.role-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
 @media screen and (max-width: 600px) {
   html {
     font-size: 14px;

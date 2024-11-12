@@ -1,0 +1,168 @@
+
+.registerGame h1 {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-family: 'Bauhaus 93', sans-serif;
+}
+
+.registerGame h3 {
+    color: var(--second);
+    margin: 2rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+}
+
+.registerGame form {
+    display: grid;
+    gap: 1rem;
+    background-color: transparent;
+    margin: 0; /* Asegura que no haya márgenes extraños que puedan desfasar */
+}
+
+.registerGame label {
+    color: #ffffff;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+
+.registerGame input,
+.registerGame select,
+.registerGame textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-family: 'Roboto', sans-serif;
+    transition: all 0.3s ease;
+    box-sizing: border-box; /* Asegura que el padding no altere el tamaño total */
+}
+
+.registerGame input:focus,
+.registerGame select:focus,
+.registerGame textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(1, 97, 232, 0.2);
+}
+
+.registerGame textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.registerGame button {
+    background-color: var(--primary);
+    color: #ffffff;
+    padding: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.registerGame button:hover:not(:disabled) {
+    background-color: #0147a8;
+    transform: translateY(-1px);
+}
+
+.registerGame button:disabled {
+    background-color: rgba(1, 97, 232, 0.5);
+    cursor: not-allowed;
+}
+
+.errmsg {
+    background-color: rgba(255, 0, 0, 0.1);
+    color: #ff4444;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    text-align: center;
+}
+
+.offscreen {
+    position: absolute;
+    left: -9999px;
+}
+
+/* Success message styling */
+.registerGame section {
+    text-align: center;
+    padding: 2rem;
+}
+
+.registerGame section h1 {
+    color: #22c55e;
+    margin: 0;
+}
+
+/* Input validation indicators */
+.valid {
+    color: #22c55e;
+    margin-left: 0.25rem;
+}
+
+.invalid {
+    color: #ff4444;
+    margin-left: 0.25rem;
+}
+
+.registerGame select {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(13, 17, 24, 0.9);
+    color: #ffffff;
+    font-family: 'Roboto', sans-serif;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    appearance: none; /* Removes default browser styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}
+
+.registerGame select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(1, 97, 232, 0.2);
+}
+
+/* Styling the dropdown options */
+.registerGame select option {
+    background-color: rgba(13, 17, 24, 0.95);
+    color: #ffffff;
+    padding: 1rem;
+}
+
+/* Hover state for options */
+.registerGame select option:hover,
+.registerGame select option:focus {
+    background-color: rgba(1, 97, 232, 0.3);
+}
+
+/* For Firefox */
+.registerGame select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #ffffff;
+}
+
+/* For IE/Edge */
+.registerGame select::-ms-expand {
+    display: none;
+}
+
+/* Styling the placeholder option */
+.registerGame select option[value=""] {
+    color: rgba(255, 255, 255, 0.5);
+}

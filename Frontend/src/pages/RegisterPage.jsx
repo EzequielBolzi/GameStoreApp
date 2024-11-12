@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { faBuilding, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import CompanyRegister from './RegisterCompany';  // Previous company registration form
-import UserRegister from './RegisterUser';        // Previous user registration form
+import CompanyRegister from './companyDashboard/RegisterCompany';  
+import UserRegister from './userDashboard/RegisterUser';        
 
 const RegisterPage = () => {
-  const [registrationType, setRegistrationType] = useState('user'); // 'user' or 'company'
+  const [registrationType, setRegistrationType] = useState('user'); 
 
   return (
     <div className="max-w-2xl mx-auto p-4">
@@ -13,25 +13,25 @@ const RegisterPage = () => {
       <div className="flex justify-center mb-8 bg-gray-100 p-1 rounded-lg">
         <button
           className={`flex items-center gap-2 px-6 py-3 rounded-md transition-all ${
-            registrationType === 'user'
-              ? 'bg-white shadow-md text-blue-600'
+            registrationType === 'company'
+              ? 'bg-transparent shadow-md text-blue-600'
               : 'text-gray-600 hover:bg-gray-200'
           }`}
           onClick={() => setRegistrationType('user')}
         >
-          <FontAwesomeIcon icon={faUser} />
+          <FontAwesomeIcon icon={faUser} className='icon-individual' />
           <span> Individual</span>
         </button>
         <button
           className={`flex items-center gap-2 px-6 py-3 rounded-md transition-all ${
-            registrationType === 'company'
-              ? 'bg-white shadow-md text-blue-600'
+            registrationType === 'user'
+              ? 'bg-transparent shadow-md text-blue-600'
               : 'text-gray-600 hover:bg-gray-200'
           }`}
           onClick={() => setRegistrationType('company')}
         >
-          <FontAwesomeIcon icon={faBuilding} />
-          <span> Company</span>
+          <FontAwesomeIcon icon={faBuilding} className='icon-company'/>
+          <span>Company</span>
         </button>
       </div>
 

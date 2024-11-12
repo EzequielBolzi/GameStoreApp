@@ -1,4 +1,3 @@
-// middleware/roleAuth.js
 const roleAuth = (roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.role)) {

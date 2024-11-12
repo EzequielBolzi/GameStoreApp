@@ -1,14 +1,14 @@
 /* CSS Reset and Base Styles */
 :root {
-    --primary-color: #4CAF50;
-    --primary-hover: #45a049;
+    --primary-color: #0161E8;
+    --primary-hover: #FF019A;
     --error-color: #dc3545;
     --success-color: #28a745;
     --text-color: #333;
-    --border-color: #e0e0e0;
-    --bg-color: #ffffff;
+    --border-color: #FF019A;
+    --bg-color: #FF019A;
     --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
+    --transition: all 0.4s ease;
     --border-radius: 0.5rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
@@ -24,9 +24,8 @@ form {
     width: 100%;
     margin: 0 auto;
     padding: var(--spacing-lg);
-    background-color: var(--bg-color);
+    background-color: transparent;
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
 }
 
 /* Form Groups */
@@ -48,6 +47,8 @@ label {
 input[type="text"],
 input[type="password"],
 input[type="email"],
+input[type="url"],
+input[type="tel"],
 textarea {
     font-family: 'Nunito', system-ui, sans-serif;
     font-size: 1rem;
@@ -188,6 +189,7 @@ a:hover {
     }
 }
 
+
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
     :root {
@@ -213,4 +215,14 @@ a:hover {
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
+}
+
+.icon-individual{
+    float: left;
+    margin-top: 2px;
+}
+
+.icon-company{
+    float: left;
+    margin-top: 2px;
 }

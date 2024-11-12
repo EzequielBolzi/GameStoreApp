@@ -1,41 +1,31 @@
-// userApi.js
 import axios from 'axios';
 
-// Set the base URL for your API
-const API_BASE_URL = 'http://localhost:3000/api/users'; // Adjust the URL as needed
+const API_BASE_URL = 'http://localhost:3000/api/users'; 
 
 const userApi = {
-    // Register a new user
-    register: async (userData) => {
-        try {
-            const response = await axios.post(`${API_BASE_URL}`, userData);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error registering user');
-        }
-    },
 
-    // User login
-    login: async (credentials) => {
-        try {
-            const response = await axios.post(`${API_BASE_URL}/sessions`, credentials);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error logging in');
-        }
-    },
+  getCurrentUser: async (authToken) => {
+    try {
+ 
+      if (!authToken) {
+        throw new Error('Authorization token is required');
+      }
 
-    // Get current authenticated user information
-    getCurrentUser: async () => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/me`);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error fetching current user data');
-        }
-    },
+      const response = await axios.get(`${API_BASE_URL}/me`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`, 
+        },
+      });
 
-    // Get all users
+      return response.data; 
+
+    } catch (error) {
+
+      const message = error.response?.data?.message || error.message || 'Error fetching current user data';
+      throw new Error(message);
+    }
+  },
+
     getAllUsers: async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}`);
@@ -45,7 +35,6 @@ const userApi = {
         }
     },
 
-    // Update user profile (authenticated user only)
     updateProfile: async (profileData) => {
         try {
             const response = await axios.patch(`${API_BASE_URL}/profile`, profileData);
@@ -55,7 +44,6 @@ const userApi = {
         }
     },
 
-    // Reset user password
     forgotPassword: async (email) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/forgot-password`, { email });
@@ -65,7 +53,6 @@ const userApi = {
         }
     },
 
-    // Comment and rate a game
     commentAndRate: async (gameId, commentData) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/commendAndRate/${gameId}`, commentData);
@@ -75,7 +62,6 @@ const userApi = {
         }
     },
 
-    // Delete a comment and rating
     deleteCommentAndRate: async (commentId) => {
         try {
             const response = await axios.delete(`${API_BASE_URL}/commendAndRate/${commentId}`);
@@ -85,7 +71,6 @@ const userApi = {
         }
     },
 
-    // Purchase a game
     purchaseGame: async (gameId) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/orders/${gameId}`);
@@ -95,20 +80,33 @@ const userApi = {
         }
     },
 
-    // Add a game to the wishlist
-    addGameToWishlist: async (gameId) => {
+    addGameToWishlist: async (gameId, authToken) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/wishlist/${gameId}`);
+            const response = await axios.post(
+                `${API_BASE_URL}/wishlist/${gameId}`, 
+                {}, 
+                {  
+                    headers: {
+                        Authorization: `Bearer ${authToken}`
+                    }
+                }
+            );
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error adding game to wishlist');
         }
     },
 
-    // Remove a game from the wishlist
-    removeGameFromWishlist: async (gameId) => {
+    removeGameFromWishlist: async (gameId, authToken) => {
         try {
-            const response = await axios.delete(`${API_BASE_URL}/wishlist/${gameId}`);
+            const response = await axios.delete(
+                `${API_BASE_URL}/wishlist/${gameId}`, 
+                {  
+                    headers: {
+                        Authorization: `Bearer ${authToken}`
+                    }
+                }
+            );
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error removing game from wishlist');

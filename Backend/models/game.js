@@ -6,7 +6,6 @@ const GameViewSchema = new mongoose.Schema({
   viewedAt: { type: Date, default: Date.now }
 });
 
-// Create a compound index to ensure unique views per user per game
 GameViewSchema.index({ game: 1, user: 1 }, { unique: true });
 
 const GameSchema = new mongoose.Schema({
@@ -42,7 +41,8 @@ const GameSchema = new mongoose.Schema({
   purchases: { type: Number, default: 0 },
   wishlistCount: { type: Number, default: 0 },
   revenue: { type: Number, default: 0 }, 
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  gamePhoto: { type: String, required: true}
 });
 
 //virtual to check if the game is currently on sale
@@ -50,7 +50,6 @@ GameSchema.virtual('isOnSale').get(function() {
   return this.salePrice && this.saleEndDate && new Date() < this.saleEndDate;
 });
 
-// pre-save middleware to calculate sale price and handle expired sales
 GameSchema.pre('save', function(next) {
   // Calculate sale price if there's a discount percentage
   if (this.discountPercentage > 0) {
@@ -70,17 +69,17 @@ GameSchema.pre('save', function(next) {
 // Ensure virtuals are included in JSON and object outputs
 GameSchema.set('toJSON', {
   virtuals: true,
-  versionKey: false, // Hides __v
+  versionKey: false, 
   transform: function (doc, ret) {
-    delete ret._id; // Removes _id from the output
+    delete ret._id; 
   }
 });
 
 GameSchema.set('toObject', {
   virtuals: true,
-  versionKey: false, // Hides __v
+  versionKey: false, 
   transform: function (doc, ret) {
-    delete ret._id; // Removes _id from the output
+    delete ret._id; 
   }
 });
 

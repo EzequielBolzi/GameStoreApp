@@ -8,7 +8,6 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     let user;
-    // Check if it's a user or a company based on the role
     if (decoded.role === 'user') {
       user = await User.findOne({ _id: decoded._id });
     } else if (decoded.role === 'company') {
@@ -21,7 +20,7 @@ const auth = async (req, res, next) => {
 
     req.token = token;
     req.user = user;
-    req.role = decoded.role; // Save the role in the request object for further use
+    req.role = decoded.role; 
     next();
   } catch (error) {
     res.status(401).send({ error: 'Please authenticate.' });

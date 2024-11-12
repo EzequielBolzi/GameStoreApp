@@ -5,36 +5,28 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:3000/api/companies'; // Adjust the URL as needed
 
 const companyApi = {
-    // Register a new company
-    register: async (companyData) => {
-        try {
-            const response = await axios.post(`${API_BASE_URL}`, companyData);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error registering company');
-        }
-    },
-
-    // Company login
-    login: async (credentials) => {
-        try {
-            const response = await axios.post(`${API_BASE_URL}/sessions`, credentials);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error logging in');
-        }
-    },
-
     // Get current authenticated company information
-    getCurrentCompany: async () => {
+    getCurrentCompany: async (authToken) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/me`);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error fetching current company data');
-        }
-    },
-
+            // Ensure that the authToken is provided before making the request
+            if (!authToken) {
+              throw new Error('Authorization token is required');
+            }
+      
+            const response = await axios.get(`${API_BASE_URL}/me`, {
+              headers: {
+                Authorization: `Bearer ${authToken}`, // Add token to headers
+              },
+            });
+      
+            return response.data; // Returns user data
+      
+          } catch (error) {
+            // Enhanced error handling to cover all cases
+            const message = error.response?.data?.message || error.message || 'Error fetching current user data';
+            throw new Error(message);
+          }
+        },
     // Get all companies 
     getAllCompanies: async () => {
         try {
@@ -54,11 +46,16 @@ const companyApi = {
     },
 
     // Update company profile (authenticated company only)
-    updateCompanyProfile: async (profileData) => {
+    updateCompanyProfile: async (profileData, authToken) => {
         try {
-            const response = await axios.patch(`${API_BASE_URL}/profile`, profileData);
+            const response = await axios.patch(`${API_BASE_URL}/profile`, profileData, {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,  // Add token to headers
+                },
+            });
             return response.data;
         } catch (error) {
+            console.log(profileData,authToken);
             throw new Error(error.response?.data?.message || 'Error updating company profile');
         }
     },

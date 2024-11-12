@@ -6,78 +6,9 @@ const crypto = require('crypto');
 const { Comment } = require('../models/comment');
 const { Game, GameView } = require('../models/game');
 const User = require('../models/user');
-const { RegisterDto } = require('../dtos/registerDto');
 const { UserDto } = require('../dtos/userDto');
 const Purchase = require ('../models/purchase');
 
-// User registration
-const register = async (req, res) => {
-    try {
-        const { email, password, confirmPassword } = req.body;
-
-        if (password !== confirmPassword) {
-            return res.status(400).json({ message: 'Passwords do not match' });
-        }
-
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email already in use' });
-        }
-
-        const user = new User(req.body);
-        await user.save();
-
-        const userDto = new UserDto(user);
-        const registerDto = new RegisterDto("User registered successfully", userDto);
-
-        res.status(201).json(registerDto);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-// User login
-const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
-        }
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        const isPasswordValid = await user.checkPassword(password);
-
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        // Check if it's a temporary password and if it has expired
-        if (user.resetPasswordExpires) {
-            if (user.resetPasswordExpires < Date.now()) {
-                return res.status(401).json({ message: 'Temporary password has expired. Please use the forgot password feature to get a new one.' });
-            }
-        }
-
-        const token = user.generateAuthToken();
-        const userDto = new UserDto(user);
-
-        res.status(200).json({ 
-            user: userDto, 
-            token
-                });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'An error occurred during login', error: error.message });
-    }
-};
-
-// Update profile
 const updateProfile = async (req, res) => {
     try {
         const allowedUpdates = ['email', 'password', 'confirmPassword', 'cardName', 'cardNumber', 'cardExpiration', 'cardCVV'];
@@ -117,13 +48,11 @@ const updateProfile = async (req, res) => {
     }
 };
 
-// Get current user info
 const getCurrentUser = (req, res) => {
     const userDto = new UserDto(req.user);
     res.status(200).json(userDto);
 };
 
-// Get all users (consider adding pagination)
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.find().select('-password');
@@ -134,7 +63,6 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-// Forgot password
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -149,7 +77,6 @@ const forgotPassword = async (req, res) => {
             return res.status(404).json({ message: 'User with this email does not exist' });
         }
 
-        // Generate a random temporary password
         const temporaryPassword = crypto.randomBytes(2).toString('hex');
         
         console.log('Temporary password generated:', temporaryPassword); // For debugging
@@ -158,13 +85,11 @@ const forgotPassword = async (req, res) => {
             throw new Error('Failed to generate temporary password');
         }
 
-        // Update user's password in the database
         user.password = temporaryPassword;
         user.resetPasswordExpires = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // 31 days from now
 
         await user.save();
 
-        // Email sending logic
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -189,7 +114,6 @@ const forgotPassword = async (req, res) => {
     }
 };
 
-// Create comment and rate
 const createCommentAndRate = async (req, res) => {
     try {
         const { gameId } = req.params;
@@ -227,7 +151,6 @@ const createCommentAndRate = async (req, res) => {
     }
 };
 
-// Delete comment and rate
 const deleteCommentAndRate = async (req, res) => {
     try {
         const comment = await Comment.findById(req.params.commentId);
@@ -258,33 +181,27 @@ const purchaseGame = async (req, res) => {
         const { gameId } = req.params;
         const userId = req.user._id;
 
-        // Find the game
         const game = await Game.findById(gameId);
         if (!game) {
             return res.status(404).json({ message: 'Game not found' });
         }
 
-        // Check if user already owns the game
         const user = await User.findById(userId);
         if (user.purchasedGames.includes(gameId)) {
             return res.status(400).json({ message: 'You already own this game' });
         }
 
-        // Check if user has stored payment information
         const hasStoredPaymentInfo = user.cardNumber && user.cardExpiration && user.cardCVV;
         
-        // Initialize payment info
         let paymentInfo;
 
         if (hasStoredPaymentInfo) {
-            // Use stored payment information
             paymentInfo = {
                 cardNumber: user.cardNumber,
                 cardExpiration: user.cardExpiration,
                 cardCVV: user.cardCVV
             };
         } else {
-            // If no stored payment info, require new payment information
             const { cardNumber, cardExpiration, cardCVV } = req.body;
             
             if (!cardNumber || !cardExpiration || !cardCVV) {
@@ -297,7 +214,6 @@ const purchaseGame = async (req, res) => {
             paymentInfo = { cardNumber, cardExpiration, cardCVV };
         }
 
-        // Validate card info format (whether stored or new)
         const cardNumberRegex = /^\d{16}$/;
         const cardExpirationRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
         const cardCVVRegex = /^\d{3,4}$/;
@@ -317,7 +233,6 @@ const purchaseGame = async (req, res) => {
         let purchase;
 
         if (game.isOnSale) {
-        // Create purchase record with Sale
         purchase = new Purchase({
             user: userId,
             game: gameId,
@@ -328,7 +243,6 @@ const purchaseGame = async (req, res) => {
         });
         }
         else{
-        // Create purchase record
         purchase = new Purchase({
             user: userId,
             game: gameId,
@@ -340,22 +254,18 @@ const purchaseGame = async (req, res) => {
         
         await purchase.save();
 
-        // Only track views for authenticated users
         if (req.user) {
-            // Check if the user has already viewed this game
              const existingView = await GameView.findOne({
                     game: game._id,
                     user: req.user._id
                 });
         
-            // If no existing view is found, create a new one and increment uniqueViews
             if (!existingView) {
                 await GameView.create({
                 game: game._id,
                 user: req.user._id
                         });
         
-            // Increment the uniqueViews counter only for the first-time view
             await Game.findByIdAndUpdate(
                     game._id,
                     { $inc: { uniqueViews: 1 } },
@@ -363,7 +273,6 @@ const purchaseGame = async (req, res) => {
                     );
                 }
             }
-        // Add game to user's purchased games and remove from wishlist
         await User.findByIdAndUpdate(
             userId,
             { 
@@ -372,7 +281,6 @@ const purchaseGame = async (req, res) => {
             }
         );
 
-        // Update game purchase count
         let purchaseAmount;
         if(game.isOnSale){
             purchaseAmount = game.salePrice; 
@@ -428,22 +336,18 @@ const purchaseGame = async (req, res) => {
             });
             }
 
-        // Only track views for authenticated users
         if (req.user) {
-            // Check if the user has already viewed this game
             const existingView = await GameView.findOne({
                 game: game._id,
                 user: req.user._id
             });
 
-            // If no existing view is found, create a new one and increment uniqueViews
             if (!existingView) {
                 await GameView.create({
                     game: game._id,
                     user: req.user._id
                 });
 
-                // Increment the uniqueViews counter only for the first-time view
                 await Game.findByIdAndUpdate(
                     game._id,
                     { $inc: { uniqueViews: 1 } },
@@ -451,7 +355,6 @@ const purchaseGame = async (req, res) => {
                 );
             }
         }
-        // Refresh the game data to get updated view count
         const updatedGame = await Game.findById(req.params.id);
 
     } catch (error) {
@@ -463,30 +366,25 @@ const purchaseGame = async (req, res) => {
     }
 };
 
-// Add game to wishlist
 const addGameToWishlist = async (req, res) => {
     try {
         const { gameId } = req.params;
         const userId = req.user._id;
 
-        // Check if the game exists
         const game = await Game.findById(gameId);
         if (!game) {
             return res.status(404).json({ message: 'Game not found' });
         }
 
-        // Find the user
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Check if the game is already in wishlist or purchased
         if (user.wishlist.includes(gameId) || user.purchasedGames.includes(gameId)) {
             return res.status(400).json({ message: 'You have already added this game to your wishlist or already purchased it' });
         }
 
-        // Add the game to wishlist
         user.wishlist.push(gameId);
         game.wishlistCount = (game.wishlistCount || 0) + 1; 
         await user.save();
@@ -498,30 +396,26 @@ const addGameToWishlist = async (req, res) => {
         return res.status(500).json({ message: 'An error occurred', error: error.message }); 
     }
 };
-// Remove game from wishlist
 const removeGameFromWishlist = async (req, res) => {
     try {
         const { gameId } = req.params;
         const userId = req.user._id;
 
-        // Find the user
+       
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Check if the game is in the wishlist
         if (!user.wishlist.includes(gameId)) {
             return res.status(400).json({ message: 'Game not found in your wishlist' });
         }
 
-        // Find the game using the gameId
         const game = await Game.findById(gameId); // Corrected this line to use gameId
         if (!game) {
             return res.status(404).json({ message: 'Game not found' }); // Added this check
         }
 
-        // Remove the game from wishlist
         user.wishlist = user.wishlist.filter(id => id.toString() !== gameId);
         game.wishlistCount = Math.max(game.wishlistCount - 1, 0); 
         await user.save();
@@ -538,8 +432,6 @@ const removeGameFromWishlist = async (req, res) => {
 
 
 module.exports = {
-    register,
-    login,
     getCurrentUser,
     getAllUsers,
     updateProfile,

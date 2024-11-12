@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import './login.css';
-import userApi from '../api/userApi';
+import authApi from '../api/authApi';
 import useAuth from '../hooks/useAuth';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ const Login = () => {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/main"; 
+  const from = location.state?.from?.pathname || "/main";
 
   const userRef = useRef();
   const errRef = useRef();
@@ -18,7 +18,7 @@ const Login = () => {
   const [errMsg, setErrMsg] = useState('');
 
   useEffect(() => {
-    userRef.current.focus();
+    userRef.current?.focus();
   }, []);
 
   useEffect(() => {
@@ -27,27 +27,37 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    
     try {
-      console.log(email, password);
-      const response = await userApi.login(
+      const response = await authApi.login(
         { email, password },
         {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true
         }
       );
-      console.log(response); 
-     const accessToken = response.token;  
-     const role = response.user.role;
-     localStorage.setItem('token', JSON.stringify(accessToken)); // Añade esto
-      setAuth({ email, password, role , accessToken });  
+      const accessToken = response.token;
+     
+      const role = response.company ? 'company' : 'user'; 
+  
+
+      localStorage.setItem('token', JSON.stringify(accessToken));
+      localStorage.setItem('role', role); 
+      
+      setAuth({ 
+        email, 
+        role, 
+        accessToken 
+      });
+  
       setEmail('');
       setPassword('');
-      console.log("Redirecting from: ", from);
-  
-      navigate(from, { replace: true }); 
-    }catch (err) {
+      
+      console.log('Navigating to:', from);
+      
+      navigate(from, { replace: true });
+      
+    } catch (err) {
       if (!err?.response) {
         setErrMsg('No Server Response');
       } else if (err.response?.status === 400) {
@@ -57,7 +67,7 @@ const Login = () => {
       } else {
         setErrMsg('Login Failed');
       }
-      errRef.current.focus();
+      errRef.current?.focus();
     }
   };
 
@@ -87,7 +97,7 @@ const Login = () => {
           value={password}
           required
         />
-        <button>Sign In</button>
+        <button type="submit">Sign In</button>
       </form>
       <p>
         Need an Account?<br />

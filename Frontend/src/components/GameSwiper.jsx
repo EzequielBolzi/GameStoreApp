@@ -15,12 +15,9 @@ function GameSwiper({ games }) {
     const handleToggleVideo=()=>{
         setActive(!active);
     }
-  // Check if games is loaded and valid
   if (!games || games.length === 0) {
     return <div>No games available</div>;
   }
-// Inside GameSwiper component:
-console.log("Games in GameSwiper:", games); // Log to check if `games` is passed correctly
   return (
     <Swiper
       effect={'coverflow'}

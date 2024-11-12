@@ -19,7 +19,8 @@ const UserSchema = new mongoose.Schema({
   purchasedGames: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],
   createdAt: { type: Date, default: Date.now },
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-  resetPasswordExpires: {type: Date}
+  resetPasswordExpires: {type: Date},
+  profileAvatar: { type: String, required: true}
 });
 
 // Hash the password before saving
@@ -30,7 +31,7 @@ UserSchema.pre('save', async function(next) {
 
 // Method to check if password is correct
 UserSchema.methods.checkPassword = async function(password) {
-    return await bcrypt.compare(password, this.password);
+    return await bcrypt.compare(password, this.password); // assuming this.password is hashed
 };
 
 // Method to generate auth token

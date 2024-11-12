@@ -1,40 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './categories.css';
 import filterListData from '../data/filterListData';
 import GameCard from '../components/GameCard';
 
-function Categories({ games, reference }) {
-  const [data,setData] = useState(games);
+function Categories({ games, reference, onGameDelete, onSuccess }) {
+  const [data, setData] = useState(games);
   const [filters, setFilters] = useState(filterListData);
+  const [text, setText] = useState('');
 
+  // Handle category filtering
   const handleFilterGames = (category) => {
-    setFilters(
-      filters.map((filter) => {
-        filter.active = false;
-        if (filter.name === category) {
-          filter.active = true;
-        }
+    setFilters((prevFilters) =>
+      prevFilters.map((filter) => {
+        filter.active = filter.name === category;
         return filter;
       })
     );
-    if(category==='All'){
-      setData(games);
-      return;
+    
+    if (category === 'All') {
+      setData(games); // If "All" category is selected, show all games
+    } else {
+      setData(games.filter((game) => game.category === category)); // Filter by category
     }
-
-    setData(games.filter(game=>game.category === category))
   };
-  const[text, setText] = useState('');
 
-  const handleSearchGames= e =>{
-        setData(
-          games.filter(
-            game=>game.name.toLowerCase().includes(e.target.value.toLowerCase())
-          )
+  // Handle search filtering
+  const handleSearchGames = (e) => {
+    const searchText = e.target.value.toLowerCase();
+    setText(searchText);
+    
+    setData(
+      games.filter((game) =>
+        game.name.toLowerCase().includes(searchText)
+      )
+    );
+  };
 
-        )
-        setText(e.target.value);
-  }
+  useEffect(() => {
+    setData(games); // Reset data when games are fetched or updated
+  }, [games]);
+
   return (
     <section id="categories" className="categories" ref={reference}>
       <div className="container-fluid mt-2">
@@ -43,7 +48,13 @@ function Categories({ games, reference }) {
             <div className="search-container">
               <div className="search">
                 <i className="bi bi-search"></i>
-                <input type="text" name="search" placeholder="Search" value={text} onChange={handleSearchGames} />
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="Search"
+                  value={text}
+                  onChange={handleSearchGames}
+                />
               </div>
               <div className="dropdown">
                 <button className="dropdown-button">
@@ -64,9 +75,9 @@ function Categories({ games, reference }) {
             </div>
           </div>
         </div>
-        <div className="row" >
+        <div className="row">
           {data.map((game) => (
-            <GameCard key={game.id} game={game} />
+            <GameCard key={game.id} game={game} onGameDelete={onGameDelete} />
           ))}
         </div>
       </div>

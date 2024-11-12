@@ -1,6 +1,7 @@
 .gameCard {
     position: relative;
     padding: 25px 20px;
+    margin-top: 15px;
     margin-bottom: 25px;
     width: auto;
     height: 400px;
@@ -38,7 +39,64 @@
 .gameCard .like.active {
     color: var(--second);
 }
+.gameCard .addCart {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    color: #ffffff;
+    background: var(--second);
+    padding: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px 0 20px 0;
+    font-size: 1.2rem;
+    transition: 0.35s;
+    }
+    .gameCard .addCart:hover {
+    background: var(--primary);
+    }
 
+.gameCard .addDiscount {
+    position: absolute;
+    top: 24px;
+    right: 19px;
+    width: 40px;
+    height: 40px;
+    background: var(--bgColor);
+    padding: 5px;
+    border-radius: 0 0 20px 20px;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.gameCard .addDiscount:hover {
+    color: var(--second);
+}
+.gameCard .deleteGame {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    color: #ffffff;
+    background: var(--second);
+    padding: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px 0 20px 0;
+    font-size: 1.2rem;
+    transition: 0.35s;
+    }
+    .gameCard .deleteGame:hover {
+    background: var(--primary);
+    }
 .gameCard span{
     color: #ffffff;
 }
@@ -91,22 +149,3 @@
     font-size: 1.2rem;
     font-weight: 800;
 }
-.gameCard .addBag {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    color: #ffffff;
-    background: var(--second);
-    padding: 10px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 20px 0 20px 0;
-    font-size: 1.2rem;
-    transition: 0.35s;
-    }
-    .gameCard .addBag:hover {
-    background: var(--primary);
-    }

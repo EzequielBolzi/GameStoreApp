@@ -1,44 +1,80 @@
-const mongoose = require('mongoose');  
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Company Model
 const CompanySchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, match: /.+\@.+\..+/ },
-  companyName: { type: String, required: true },
-  role: { type: String, enum: ['company'], default: 'company' }, 
-  password: { type: String, required: true },
-  country: { type: String, required: true },
-  city: { type: String, required: true },
-  street: { type: String, required: true },
-  address: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
-  games: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],  // Array of Game references
+  companyName: { type: String, unique: true },
+  role: { type: String, enum: ['company'], default: 'company' },
+  password: { type: String}, 
+  country: { type: String },
+  city: { type: String },
+  street: { type: String },
+  address: { type: String },
+  phoneNumber: { type: String },
+  games: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],
   createdAt: { type: Date, default: Date.now },
-  resetPasswordToken: {type: String},
-  resetPasswordExpires: {type: Date}
+  profileAvatar: { type: String },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 }, { timestamps: true });
 
-// Hash the password before saving
+// Hash the password before saving 
 CompanySchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 8);
+  try {
+    if (!this.isModified('password')) return next();
+    
+    // Generate salt and hash password
+    const salt = await bcrypt.genSalt(8);
+    const hashedPassword = await bcrypt.hash(this.password, salt);
+    this.password = hashedPassword;
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
-// Method to check if password is correct
+//  password checking method
 CompanySchema.methods.checkPassword = async function(password) {
-  return await bcrypt.compare(password, this.password);
+  try {
+    if (!this.password) {
+      throw new Error('Password not set for this company');
+    }
+    return await bcrypt.compare(password, this.password);
+  } catch (error) {
+    throw new Error('Error checking password: ' + error.message);
+  }
 };
 
-// Method to generate auth token
+// JWT token generation
 CompanySchema.methods.generateAuthToken = function() {
-  return jwt.sign({ _id: this._id, role: this.role }, process.env.JWT_SECRET, { expiresIn: '31d' });
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is not set');
+  }
+  return jwt.sign(
+    { 
+      _id: this._id, 
+      role: this.role,
+      email: this.email 
+    }, 
+    process.env.JWT_SECRET, 
+    { expiresIn: '31d' }
+  );
 };
 
+// Reset password token generation
 CompanySchema.methods.generateResetPasswordToken = function() {
-  const resetToken = jwt.sign({ _id: this._id }, process.env.JWT_RESET_SECRET, { expiresIn: '1h' });
+  if (!process.env.JWT_RESET_SECRET) {
+    throw new Error('JWT_RESET_SECRET environment variable is not set');
+  }
+  const resetToken = jwt.sign(
+    { _id: this._id },
+    process.env.JWT_RESET_SECRET,
+    { expiresIn: '1h' }
+  );
   this.resetPasswordToken = resetToken;
-  this.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+  this.resetPasswordExpires = Date.now() + 3600000; // 1 hour
   return resetToken;
 };
 

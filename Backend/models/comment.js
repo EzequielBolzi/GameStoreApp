@@ -3,7 +3,6 @@ const User = require('../models/user');
 const Game = require('../models/game');
 const Company = require('../models/company');
 
-// Comment Model
 const CommentSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     game: { type: mongoose.Schema.Types.ObjectId, ref: 'Game', required: true },

@@ -1,7 +1,6 @@
-// routes/game.routes.js
 const express = require('express');
 const router = express.Router();
-const { createGame, getAllGames, getGame, updateGame, deleteGame,getStatistics, setGameSale, removeSale } = require('../controllers/gameController');
+const { createGame, getAllGames, getGame, updateGame, deleteGame,getStatistics, setGameSale, removeSale, checkGame } = require('../controllers/gameController');
 const auth = require('../middleware/auth'); 
 const roleAuth = require('../middleware/roleAuth');
 
@@ -25,9 +24,10 @@ router.delete('/:id', auth, roleAuth(['company']), deleteGame);
 router.get('/statistics/:id', auth, roleAuth(['company']), getStatistics);
 
 // Set percentage of sale  
-router.post('/sale/:id', auth, roleAuth(['company']), setGameSale);
+router.post('/sales/:id', auth, roleAuth(['company']), setGameSale);
 
-// Get Statistics  
-router.delete('/sale/:id', auth, roleAuth(['company']), removeSale);
+// Delete sales  
+router.delete('/sales/:id', auth, roleAuth(['company']), removeSale);
+
 
 module.exports = router;

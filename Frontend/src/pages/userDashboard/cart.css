@@ -1,0 +1,42 @@
+.shopCartTable {
+    margin-top: 50px;
+    color: #ffffff;
+    border-radius: 20px;
+    background: var(--bgColor);
+    box-shadow: -5px -5px 15px rgba(1, 97, 232, 0.1),
+    5px 5px 15px rgba(155, 0, 232, 0.35);
+}
+
+.shopCartTable thead tr{
+    font-size: 1.3rem;
+}
+
+.shopCartTable thead tr th{
+    background: transparent;
+    color: #ffffff;
+}
+
+.itemCount{
+    font-size: 1.3rem;
+}
+
+.payment {
+    display: inline-flex;
+    align-items: center;
+    gap: 50px;
+    font-size: 1.3rem;
+    color: #ffffff;
+}
+
+.payment a {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #ffffff;
+    border-radius: 15px;
+    display: inline-flex;
+    align-items: 15px;
+    gap: 10px;
+    background: var(--bgColor);
+    box-shadow: -5px -5px 15px rgba(1, 97, 232, 0.1),
+    5px 5px 15px rgba(155, 0, 232, 0.35);
+}

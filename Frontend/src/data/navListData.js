@@ -27,6 +27,20 @@ const navListData = [
       icon: 'bi-bag',
       active: false,
     },
+    {
+      _id: 5,
+      target: 'registerGame',
+      name: 'Register Game',
+      icon: 'bi-plus-circle',
+      active: false,
+    },
+    {
+      _id: 6,
+      target: 'companyGames',
+      name: 'My Games',
+      icon: 'bi-joystick',
+      active: false,
+    },
   ];
   
   export default navListData;
