@@ -17,10 +17,15 @@ header {
 }
 
 .userItems {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 20px;
-}
+    gap: 1rem;
+  }
+
+  .userItems.right-aligned {
+    margin-left: auto; 
+    justify-content: flex-end;
+  }
 
 .userItems .icon {
     position: relative;

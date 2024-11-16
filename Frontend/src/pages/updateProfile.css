@@ -1,0 +1,111 @@
+/* Container styles */
+.profile-container {
+  padding: 10px;
+}
+
+/* Card styles */
+.profile-container .profile-card {
+  background-color: transparent;
+  border: none;
+}
+
+.profile-container .profile-card .card-header {
+  background-color: transparent;
+  padding: 1.5rem;
+}
+
+.profile-container .profile-card .card-header h2 {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.profile-container .profile-card .card-header a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.profile-container .profile-card .card-header a:hover {
+  text-decoration: underline;
+}
+
+.profile-container .profile-card .card-body {
+  padding: 2rem;
+  background-color: transparent;
+  border: none;
+}
+
+/* Form styles */
+.profile-container .profile-form .form-label {
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.profile-container .profile-form .form-control {
+  border: none;
+  border-radius: 6px;
+  padding: 0.625rem;
+  transition: border-color 0.2s ease;
+}
+
+.profile-container .profile-form .form-control:focus {
+  border: none;
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+}
+
+.profile-container .profile-form .form-control::placeholder {
+  color: #a0aec0;
+}
+
+/* Button styles */
+.profile-container .profile-form .btn-primary {
+  padding: 0.625rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.profile-container .profile-form .btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Alert styles */
+.alert-container {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1050;
+}
+
+.custom-alert {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  animation: fadeOut 5s forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+/* Responsive spacing */
+@media (max-width: 768px) {
+  .profile-container {
+      padding: 5rem 0;
+  }
+
+  .profile-card .card-body {
+      padding: 1.5rem;
+  }
+
+  .profile-form .row {
+      margin-bottom: 1rem;
+  }
+}

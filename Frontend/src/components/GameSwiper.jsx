@@ -47,11 +47,6 @@ function GameSwiper({ games }) {
             <img src={game.gamePhoto} alt="Game Image " />
             <div className="content">
                 <h2>{game.name}</h2>
-                <p>{game.description}</p>
-                <div className="buttons">
-                 <a href="#" className="orderBtn">Order Now</a>
-               
-                </div>
           </div>
           </div>
         </SwiperSlide>

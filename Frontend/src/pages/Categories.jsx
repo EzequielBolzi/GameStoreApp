@@ -3,7 +3,7 @@ import './categories.css';
 import filterListData from '../data/filterListData';
 import GameCard from '../components/GameCard';
 
-function Categories({ games, reference, onGameDelete, onSuccess }) {
+function Categories({ games, reference, onGameDelete }) {
   const [data, setData] = useState(games);
   const [filters, setFilters] = useState(filterListData);
   const [text, setText] = useState('');
@@ -18,13 +18,12 @@ function Categories({ games, reference, onGameDelete, onSuccess }) {
     );
     
     if (category === 'All') {
-      setData(games); // If "All" category is selected, show all games
+      setData(games); 
     } else {
-      setData(games.filter((game) => game.category === category)); // Filter by category
+      setData(games.filter((game) => game.category === category)); 
     }
   };
 
-  // Handle search filtering
   const handleSearchGames = (e) => {
     const searchText = e.target.value.toLowerCase();
     setText(searchText);
@@ -37,7 +36,7 @@ function Categories({ games, reference, onGameDelete, onSuccess }) {
   };
 
   useEffect(() => {
-    setData(games); // Reset data when games are fetched or updated
+    setData(games); 
   }, [games]);
 
   return (

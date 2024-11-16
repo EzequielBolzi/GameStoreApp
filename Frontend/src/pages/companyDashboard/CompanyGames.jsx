@@ -3,7 +3,6 @@ import companyApi from '../../api/companyApi';
 import useAuth from '../../hooks/useAuth';
 import GameCard from '../../components/GameCard';
 import gameApi from '../../api/gameApi';
-import './companyGames.css';
 
 const CompanyGames = ({ reference, onSuccess, onGameDelete }) => {
   const { auth } = useAuth();
@@ -50,20 +49,19 @@ const CompanyGames = ({ reference, onSuccess, onGameDelete }) => {
       const validGames = detailedGames.filter(game => game !== null);
       
       setGames(validGames);
-      if (onSuccess) onSuccess();
+      onSuccess();
     } catch (error) {
       setError(`Error fetching company games: ${error.message}`);
     }
   };
 
   useEffect(() => {
-    fetchCompanyGames();
-  }, [authToken]);
+    if (authToken) fetchCompanyGames();
+}, [games]);  
 
-  // Ensure to remove the deleted game from the list
   const handleDeleteGame = async (gameId) => {
-    await onGameDelete(gameId);  // Call onGameDelete function passed from parent
-    setGames((prevGames) => prevGames.filter((game) => game.id !== gameId));  // Remove the game from the state
+    await onGameDelete(gameId);  
+    setGames((prevGames) => prevGames.filter((game) => game.id !== gameId)); 
   };
 
   if (error) {

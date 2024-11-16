@@ -8,6 +8,7 @@ import userApi from '../api/userApi';
 
 function GameCard({ game, onGameDelete }) {
   const [company, setCompany] = useState(null);
+  const [hasPurchased, setHasPurchased] = useState(false); 
   const { auth } = useAuth();
   const { library, setLibrary, cart, setCart } = useContext(AppContext);
   const price = game.price || 0;
@@ -25,10 +26,25 @@ function GameCard({ game, onGameDelete }) {
       }
     };
 
+    const checkIfPurchased = async () => {
+      try {
+        // Check if the user has purchased this game
+        const response = await userApi.getCurrentUser(auth.accessToken); 
+        const purchasedGames = response.purchasedGames || [];
+        setHasPurchased(purchasedGames.some(purchasedGame => purchasedGame.toString() === game.id.toString()));
+      } catch (error) {
+        console.error('Error checking purchase status:', error);
+      }
+    };
+
     if (game.company) {
       fetchCompanyInfo();
     }
-  }, [game.company]);
+
+    if (auth?.role === 'user') {
+      checkIfPurchased();
+    }
+  }, [game.company, game.id, auth]);
 
   const handleAddToLibrary = async () => {
     try {
@@ -64,38 +80,54 @@ function GameCard({ game, onGameDelete }) {
       <div className="gameCard">
         <img src={game.gamePhoto} alt={game.name} className="img-fluid" />
         {
-  auth.role === 'user' && (
-          <>
-            <a
-              href="#"
-              className={`like ${library.includes(game) ? 'active' : ''}`}
-              onClick={
-                library.includes(game)
-                  ? () => handleRemoveFromLibrary(game)
-                  : () => handleAddToLibrary(game)
-              }
-            >
-              <i className="bi bi-heart-fill"></i>
+          auth.role === 'user' && !hasPurchased && (
+            <>
+              <a
+                href="#"
+                className={`like ${library.includes(game) ? 'active' : ''}`}
+                onClick={
+                  library.includes(game)
+                    ? () => handleRemoveFromLibrary(game)
+                    : () => handleAddToLibrary(game)
+                }
+              >
+                <i className="bi bi-heart-fill"></i>
+              </a>
+              <a href="#" className="addCart" onClick={() => handleAddToCart(game)}>
+                <i className="bi bi-bag-plus-fill"></i>
+              </a>
+              <a href="#" className="gameInfo" >
+              <span>Informacion del juego.</span>
+              </a>
+            </>
+          )
+        }
+        {
+          auth.role === 'company' && (
+            <>
+              <a href="#" className="addDiscount">
+                <i className="bi bi-pen-fill"></i>
+              </a>
+              <a href="#" className="deleteGame" onClick={handleDeleteClick}>
+                <i className="bi bi-trash3-fill"></i>
+              </a>
+              <a href="#" className="gameInfo" >
+              <span>Informacion del juego.</span>
+              </a>
+            </>
+          )
+        }
+           {auth.role === 'user' && hasPurchased && (
+            <>
+            <a href="#" className="gameInfo" >
+            <span>Informacion del juego.</span>
             </a>
-            <a href="#" className="addCart" onClick={() => handleAddToCart(game)}>
-              <i className="bi bi-bag-plus-fill"></i>
-            </a>
+          <div className="ownedMessage">
+            <span>Ya tienes este juego!</span>
+          </div>
           </>
-        )
-      }
-
-      {
-        auth.role === 'company' && (
-          <>
-            <a href="#" className="addDiscount">
-              <i className="bi bi-pen-fill"></i>
-            </a>
-            <a href="#" className="deleteGame" onClick={handleDeleteClick}>
-              <i className="bi bi-trash3-fill"></i>
-            </a>
-          </>
-        )
-      }
+        
+        )}
         <div className="gameFeature">
           <span className="gameCompany">{company}</span>
           <GameRating rating={game.averageRating} />

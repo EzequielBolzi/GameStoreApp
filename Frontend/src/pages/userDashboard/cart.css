@@ -40,3 +40,18 @@
     box-shadow: -5px -5px 15px rgba(1, 97, 232, 0.1),
     5px 5px 15px rgba(155, 0, 232, 0.35);
 }
+@keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  
+  .fade-out {
+    animation: fadeOut 3s forwards;
+  }

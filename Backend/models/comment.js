@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');  
-const User = require('../models/user');
-const Game = require('../models/game');
+const mongoose = require ('mongoose');  
+const User = require ('../models/user');
+const Game = require ('../models/game');
 const Company = require('../models/company');
 
 const CommentSchema = new mongoose.Schema({

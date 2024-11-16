@@ -6,14 +6,14 @@ import NavListItem from './NavListItem';
 
 function SideMenu({ active, sectionActive, userRole }) {
   const [navData, setNavData] = useState(navListData);
-  
+
   useEffect(() => {
     let updatedNavData = [...navListData];
 
     if (userRole === 'user') {
       updatedNavData = updatedNavData.filter(item => !['registerGame', 'companyGames'].includes(item.target));
     } else if (userRole === 'company') {
-      updatedNavData = updatedNavData.filter(item => !['library', 'cart'].includes(item.target));
+      updatedNavData = updatedNavData.filter(item => !['library', 'cart','purchasedGames'].includes(item.target));
     }
 
     setNavData(updatedNavData);
@@ -26,11 +26,11 @@ function SideMenu({ active, sectionActive, userRole }) {
       return nav;
     });
     setNavData(newNavData);
-    sectionActive(target);
+    sectionActive(target); 
   };
 
   return (
-    <div className={`sideMenu ${active ? 'active' : undefined}`}>
+    <div className={`sideMenu ${active ? 'active' : ''}`}>
       <a href="#" className="logo">
         <i className="bi bi-controller"></i>
         <span className="brand">Gamestation</span>

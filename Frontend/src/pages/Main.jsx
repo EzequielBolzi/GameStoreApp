@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { AppContext } from "../App"; 
+import { AppContext } from "../App";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './main.css';
 import SideMenu from "../components/SideMenu";
 import Header from './Header';
 import Home from './Home';
-import gameApi from '../api/gameApi'; 
+import gameApi from '../api/gameApi';
 import Categories from "./Categories";
 import MyLibrary from "./userDashboard/MyLibrary";
 import Cart from "./userDashboard/Cart";
@@ -14,154 +14,170 @@ import userApi from '../api/userApi';
 import companyApi from '../api/companyApi';
 import RegisterGame from "../pages/companyDashboard/RegisterGame";
 import CompanyGames from "../pages/companyDashboard/CompanyGames";
+import UserPurchasedGames from "./userDashboard/UserPurchasedGames";
 
 function Main() {
-    const { auth } = useAuth();  
-    
+    const { auth } = useAuth();
+
     const [active, setActive] = useState(false);
-    const [games, setGames] = useState([]);  
-    const [loading, setLoading] = useState(true);  
-    const [error, setError] = useState(null);  
-    const [username, setUsername] = useState(null); 
-    const {library, cart} = useContext(AppContext);
+    const [games, setGames] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [username, setUsername] = useState(null);
+    const { library, cart } = useContext(AppContext);
 
     const homeRef = useRef();
     const categoriesRef = useRef();
     const libraryRef = useRef();
     const cartRef = useRef();
     const regisGameRef = useRef();
-    const companyGamesRef = useRef(); 
+    const companyGamesRef = useRef();
+    const purchasedGamesRef = useRef();
+
     const sections = [
         {
-          name: 'home',
-          ref: homeRef,
-          active: true,
+            name: 'home',
+            ref: homeRef,
+            active: true,
         },
         {
-          name: 'categories',
-          ref: categoriesRef,
-          active: false,
+            name: 'categories',
+            ref: categoriesRef,
+            active: false,
         },
         {
-          name: 'library',
-          ref: libraryRef,
-          active: false,
+            name: 'library',
+            ref: libraryRef,
+            active: false,
         },
         {
-          name: 'cart',
-          ref: cartRef,
-          active: false,
+            name: 'cart',
+            ref: cartRef,
+            active: false,
         },
         {
-          name: 'registerGame',
-          ref: regisGameRef,
-          active: false,
+            name: 'registerGame',
+            ref: regisGameRef,
+            active: false,
         },
         {
-          name: 'companyGames',
-          ref: companyGamesRef,  
-          active: false,
+            name: 'companyGames',
+            ref: companyGamesRef,
+            active: false,
+        },
+        {
+            name: 'purchasedGames',
+            ref: purchasedGamesRef,
+            active: false,
         }
-      ];
+    ];
+
     const handelToggleActive = () => {
         setActive(!active);
     };
 
     const handleSectionActive = (target) => {
         sections.forEach(section => {
-          if (section.ref.current) {
-            console.log('Section:', section.name);
-            section.ref.current.classList.remove('active');
-            if (section.ref.current.id === target) {
-              section.ref.current.classList.add('active');
-              console.log(`Activating section: ${section.name}`);
+            if (section.ref.current) {
+                section.ref.current.classList.remove('active');
+                if (section.ref.current.id === target) {
+                    section.ref.current.classList.add('active');
+                }
+
             }
-          }
+
         });
-      };
-      const fetchGames = async () => {
+    };
+
+    const fetchGames = async () => {
         try {
-            const response = await gameApi.getAllGames();  
-            setGames(response);  
-            setError(null); 
+            const response = await gameApi.getAllGames();
+            setGames(response);
+            setError(null);
         } catch (err) {
-            setError(err.message);  
+            setError(err.message);
         } finally {
-            setLoading(false);  
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchGames();  
-    }, []);  
+        fetchGames();
+    }, []);
 
-    const handleGameRegistrationSuccess = () => {
-        fetchGames();  
+
+    const handleFetchGames = () => {
+        fetchGames();
     };
 
-    const handleCompanyGamesSuccess = () => {
-        fetchGames();  
-    };
-
-    const handleCategoriesSuccess = () => {
-      fetchGames();  
-  };
     useEffect(() => {
         const fetchUserInfo = async () => {
             if (auth?.accessToken) {
                 try {
-                    console.log(auth.accessToken);
-
-                    const userType = auth.role; 
+                    const userType = auth.role;
 
                     let user;
                     if (userType === 'user') {
                         user = await userApi.getCurrentUser(auth.accessToken);
-                        setUsername(user.username); 
+                        setUsername(user.username);
                     } else {
                         user = await companyApi.getCurrentCompany(auth.accessToken);
-                        setUsername(user.companyName); 
+                        setUsername(user.companyName);
                     }
-                    
                 } catch (error) {
-                    setError(error.message);  
+                    setError(error.message);
                 }
             }
         };
-    
+
         fetchUserInfo();
-    }, [auth]); 
+    }, [auth]);
+
     const handleGameDelete = async (gameId) => {
-      try {
-        await gameApi.deleteGame(gameId, auth.accessToken);
-        setGames((prevGames) => prevGames.filter((game) => game.id !== gameId));
-        fetchGames();
-      } catch (error) {
-        setError(`Error deleting game: ${error.message}`);
-      } 
+        try {
+            await gameApi.deleteGame(gameId, auth.accessToken);
+            setGames((prevGames) => prevGames.filter((game) => game.id !== gameId));
+            handleFetchGames();
+        } catch (error) {
+            handleFetchGames();
+            window.alert("No se puede borrar este juego.");
+            setError(`Error deleting game: ${error.message}`);
+        }
     };
- 
+
     return (
         <main>
+            {/* En side Menu tengo la asignacion para cada rol lo que tiene aut. ver */}
             <SideMenu 
-                active={active} 
-                sectionActive={handleSectionActive}  
-                userRole={auth?.role} 
-            />
+                active={active}
+                sectionActive={handleSectionActive}
+                userRole={auth?.role}
+            /> 
             <div className={`banner ${active ? 'active' : undefined}`}>
                 <div className="content-wrapper">
-                    <Header toggleActive={handelToggleActive} username={username} />
+                    <Header toggleActive={handelToggleActive} username={username} gamesCart={cart} gamesLibrary={library} />
                     <div className="container-fluid">
-                            <>
-                            <Home games={games} loading={loading} error={error} reference={homeRef} onGameDelete={handleGameDelete}/>
-                            <Categories games={games} reference={categoriesRef} onSuccess={handleCategoriesSuccess} onGameDelete={handleGameDelete}/>
-                            <MyLibrary games={library} reference={libraryRef}/>
-                            <Cart games={cart} reference={cartRef}/>
-                            <RegisterGame reference={regisGameRef} onSuccess={handleGameRegistrationSuccess}/>       
-                            <CompanyGames reference={companyGamesRef} onSuccess={handleCompanyGamesSuccess} onGameDelete={handleGameDelete} />
-                            </>
-                  
-   
+                        <Home 
+                            games={games} 
+                            loading={loading} 
+                            error={error} 
+                            reference={homeRef}
+                            categoriesRef={categoriesRef} 
+                            onGameDelete={handleGameDelete} 
+                            onViewMoreClick={() => {
+                              handleSectionActive('categories');
+                            }}                        />
+                        <Categories 
+                            games={games} 
+                            reference={categoriesRef} 
+                            onSuccess={handleFetchGames} 
+                            onGameDelete={handleGameDelete} 
+                        />
+                        <MyLibrary games={library} reference={libraryRef}/>
+                        <Cart games={cart} reference={cartRef}/>
+                        <RegisterGame reference={regisGameRef} onSuccess={handleFetchGames}/>       
+                        <CompanyGames reference={companyGamesRef} onSuccess={handleFetchGames} onGameDelete={handleGameDelete}  />
+                        <UserPurchasedGames reference={purchasedGamesRef}  />
                     </div>
                 </div>
             </div>

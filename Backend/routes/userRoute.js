@@ -25,7 +25,7 @@ router.delete('/commendAndRate/:commentId', auth, roleAuth(['user']), deleteComm
 router.post('/forgot-password', forgotPassword);
 
 // Buy a game
-router.post('/orders/:gameId', auth, roleAuth(['user']), purchaseGame);
+router.post('/orders', auth, roleAuth(['user']), purchaseGame);
 
 
 // Add a game to wishlist

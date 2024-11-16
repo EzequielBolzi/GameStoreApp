@@ -3,7 +3,7 @@ import './home.css';
 import GameSwiper from '../components/GameSwiper';  
 import GameCard  from '../components/GameCard';
 
-function Home({ games, loading, error , reference}) {
+function Home({ games, loading, error , reference, onGameDelete, onViewMoreClick}) {
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -14,6 +14,7 @@ function Home({ games, loading, error , reference}) {
 
     const gamesOnSale = games.filter(game => game.isOnSale);
 
+    
     return ( 
       <section id="home" className="home active" ref={reference}>
         <div className="container-fluid">
@@ -25,12 +26,17 @@ function Home({ games, loading, error , reference}) {
               <h2 className="sectionTitle">Games on promotion</h2>
             </div>
             <div className="col-lg-6 d-flex justify-content-end align-items-center">
-              <a href="#" className="viewMore"> View More games  <i className="bi bi-arrow-right"></i></a>
+              <a href="#" onClick={(e) => { 
+                e.preventDefault(); 
+                onViewMoreClick();
+              }} className="viewMore">
+                 View More games  <i className="bi bi-arrow-right"></i>
+              </a>  
             </div>
             
             {
               gamesOnSale.slice(0, 4).map(game => (
-                <GameCard key={game.id} game={game} />
+                <GameCard key={game.id} game={game} onGameDelete={onGameDelete} />
               ))
             }
           </div>

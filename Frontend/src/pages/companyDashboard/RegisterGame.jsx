@@ -6,6 +6,7 @@ import '../register.css';
 import useAuth from '../../hooks/useAuth';
 import filterListData from '../../data/filterListData';
 import '../companyDashboard/registerGame.css';
+import CompanyGames from "./CompanyGames";
 
 const NAME_REGEX = /^[A-Za-z0-9\s]{3,50}$/;
 const PRICE_REGEX = /^[0-9]+(\.[0-9]{1,2})?$/;
@@ -69,12 +70,10 @@ const RegisterGame = ({ reference, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
         if (!validName || !validPrice) {
             setErrMsg("Invalid Entry");
             return;
         }
-    
         try {
             
             const gameData = {
@@ -94,21 +93,13 @@ const RegisterGame = ({ reference, onSuccess }) => {
                 gamePhoto: gamePhoto || 'default.jpg' // Use the provided photo URL or a default one
             };
             await gameApi.createGame(gameData, auth.accessToken);
-            
             setSuccess(true);
             resetForm();
-    
-            // Call the onSuccess callback to refresh the games list
-            if (onSuccess) {
-                onSuccess();  // Trigger a refresh of the games list in Main
-            }
-    
+            onSuccess();  // Call onSuccess to refresh games
         } catch (error) {
             setErrMsg(error.response?.data?.message || "Failed to register game");
-            errRef.current.focus();
         }
     };
-
     // Show a temporary success message and then reset
     useEffect(() => {
         let timeoutId;

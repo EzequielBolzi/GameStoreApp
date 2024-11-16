@@ -1,8 +1,18 @@
-import { useContext } from "react";
-import AuthContext from "../context/AuthProvider";
+import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AuthContext from '../context/AuthProvider';
 
-const useAuth = () => {
-    return useContext(AuthContext);
+function useAuth() {
+  const { auth, setAuth } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const logout = () => {
+    setAuth({});  
+    localStorage.removeItem('token');  
+    navigate('/login');  
+  };
+
+  return { auth, setAuth, logout };
 }
 
 export default useAuth;

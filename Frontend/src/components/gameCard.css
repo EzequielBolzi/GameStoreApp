@@ -4,7 +4,7 @@
     margin-top: 15px;
     margin-bottom: 25px;
     width: auto;
-    height: 400px;
+    height: 450px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 20px;
     background: var(--bgColor);
@@ -149,3 +149,16 @@
     font-size: 1.2rem;
     font-weight: 800;
 }
+.ownedMessage   {
+    padding: 10px;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 5px;
+    font-family: 'Gill Sans Extrabold';
+}
+
+.ownedMessage span {
+    color: var(--second);
+    font-style: italic;
+}
+

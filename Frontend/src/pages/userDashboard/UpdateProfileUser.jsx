@@ -1,91 +1,109 @@
 import React, { useState, useEffect } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { Container, Card, Form, Button, Alert, Row, Col } from 'react-bootstrap';
-import companyApi from '../../api/companyApi';
+import userApi from '../../api/userApi';
 import '.././updateProfile.css';
 import Header from '../Header';
 
-const UpdateProfile = () => {
-  const { auth } = useAuth();
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    companyName: '',
-    password: '',
-    confirmPassword: '',
-    country: '',
-    city: '',
-    street: '',
-    address: '',
-    phoneNumber: '',
-    profileAvatar: ''
-  });
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const authToken = auth?.accessToken;
-        if (!authToken) {
-          setError('Authentication token is missing.');
-          return;
+function UpdateProfileUser() {
+    const { auth } = useAuth();
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+      email: '',
+      username: '',
+      password: '',
+      confirmPassword: '', 
+      country: '',
+      city: '',
+      street: '',
+      address: '',
+      phoneNumber: '',
+      profileAvatar: '',
+      cardName: '',
+      cardNumber: '',
+      cardExpiration: '',
+      cardCVV: ''
+    });
+  
+    useEffect(() => {
+      const fetchProfile = async () => {
+        try {
+          const authToken = auth?.accessToken;
+          if (!authToken) {
+            setError('Authentication token is missing.');
+            return;
+          }
+          
+          const data = await userApi.getCurrentUser(authToken);
+          const { password, ...profileData } = data; 
+  
+          setFormData(prevState => ({
+            ...prevState,
+            ...profileData
+          }));
+        } catch (error) {
+          console.error('Failed to fetch profile:', error.message);
+          setError('Failed to load profile data.');
         }
-        
-        const data = await companyApi.getCurrentCompany(authToken);
-        const { password , ...profileData } = data; 
-        setFormData(prevState => ({
-          ...prevState,
-          ...profileData
-        }));
+      };
+  
+      fetchProfile();
+    }, [auth]);
+  
+    const handleChange = (e) => {
+      setFormData(prev => ({
+        ...prev,
+        [e.target.name]: e.target.value
+      }));
+    };
+  
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
+      setError('');
+      setSuccess('');
+
+      // Check if password and confirmPassword are not empty and match
+      if (formData.password && formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const authToken = auth?.accessToken; 
+        if (!authToken) {
+            setError('Authentication token is missing.');
+            return;
+        }
+
+        // If password is empty, remove it from the formData object before sending the request
+        const { confirmPassword, ...dataToUpdate } = formData;
+        if (!formData.password) {
+          delete dataToUpdate.password; // Don't send password if it's empty
+        }
+
+        await userApi.updateProfile(dataToUpdate, authToken); 
+        setSuccess('Profile updated successfully.');
       } catch (error) {
-        console.error('Failed to fetch profile:', error.message);
-        setError('Failed to load profile data.');
+        setError('Failed to update profile: ' + error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchProfile();
-  }, [auth]);
-
-  // Handle form field changes
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const authToken = auth?.accessToken; 
-      if (!authToken) {
-          setError('Authentication token is missing.');
-          return;
-      }
-
-      await companyApi.updateCompanyProfile(formData, authToken); 
-      setSuccess('Profile updated successfully.');
-    } catch (error) {
-      setError('Failed to update profile: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <>
-      <Header username={formData.companyName} isProfileUpdate={true} />
+    <>      
+      <Header username={formData.username} isProfileUpdate={true} />
+      <div className="alert-container">
+        {error && <Alert variant="danger" className="custom-alert">{error}</Alert>}
+        {success && <Alert variant="success" className="custom-alert">{success}</Alert>}
+      </div>
       <Container className="profile-container">
         <Card className="profile-card">
-          <Card.Body>
-            {error && <Alert className="profile-alert" variant="danger">{error}</Alert>}
-            {success && <Alert className="profile-alert" variant="success">{success}</Alert>}
+          <Card.Body >
             <Form className="profile-form" onSubmit={handleSubmit}>
               <Row>
                 <Col md={6}>
@@ -103,11 +121,11 @@ const UpdateProfile = () => {
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Company Name</Form.Label>
+                    <Form.Label>Username</Form.Label>
                     <Form.Control
                       type="text"
-                      name="companyName"
-                      value={formData.companyName}
+                      name="username"
+                      value={formData.username}
                       onChange={handleChange}
                       required
                     />
@@ -125,6 +143,7 @@ const UpdateProfile = () => {
                   minLength={6}
                 />
               </Form.Group>
+
               <Form.Group className="mb-3">
                 <Form.Label>Confirm New Password</Form.Label>
                 <Form.Control
@@ -135,6 +154,7 @@ const UpdateProfile = () => {
                   minLength={6}
                 />
               </Form.Group>
+
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
@@ -210,6 +230,59 @@ const UpdateProfile = () => {
                 </Col>
               </Row>
 
+              <Row>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Card Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="cardName"
+                      value={formData.cardName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={8}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Card Number</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="cardNumber"
+                      value={formData.cardNumber}
+                      placeholder="16 NUMEROS"
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Expiration Date</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="cardExpiration"
+                      value={formData.cardExpiration}
+                      onChange={handleChange}
+                      placeholder="MM/YY"
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={2}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>CVV</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="cardCVV"
+                      value={formData.cardCVV}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
               <div className="d-flex justify-content-end gap-2">
                 <Button
                   variant="primary"
@@ -220,11 +293,12 @@ const UpdateProfile = () => {
                 </Button>
               </div>
             </Form>
+
           </Card.Body>
         </Card>
       </Container>
     </>
   );
-};
+}
 
-export default UpdateProfile;
+export default UpdateProfileUser;

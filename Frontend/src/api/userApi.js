@@ -35,9 +35,15 @@ const userApi = {
         }
     },
 
-    updateProfile: async (profileData) => {
+    updateProfile: async (profileData,authToken) => {
         try {
-            const response = await axios.patch(`${API_BASE_URL}/profile`, profileData);
+            const response = await axios.patch(`${API_BASE_URL}/profile`,profileData, 
+                {  
+                    headers: {
+                        Authorization: `Bearer ${authToken}`
+                    }
+                }
+            );
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error updating user profile');
@@ -70,15 +76,23 @@ const userApi = {
             throw new Error(error.response?.data?.message || 'Error deleting comment and rating');
         }
     },
-
-    purchaseGame: async (gameId) => {
+   purchaseGame: async (gameIds, authToken) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/orders/${gameId}`);
-            return response.data;
+          const response = await axios.post(
+            `${API_BASE_URL}/orders`, 
+            { gameIds },  
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                'Content-Type': 'application/json' 
+              }
+            }
+          );
+          return response.data;
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error purchasing game');
+          throw new Error(error.response?.data?.message || 'Error purchasing game');
         }
-    },
+      },
 
     addGameToWishlist: async (gameId, authToken) => {
         try {

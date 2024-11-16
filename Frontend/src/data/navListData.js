@@ -41,6 +41,12 @@ const navListData = [
       icon: 'bi-joystick',
       active: false,
     },
+    {
+      _id: 7,
+      target: 'purchasedGames',
+      name: 'My Games',
+      icon: 'bi-joystick',
+      active: false,
+    },
   ];
-  
   export default navListData;

@@ -10,7 +10,12 @@ class UserDto {
       this.phoneNumber = user.phoneNumber;
       this.wishlist = user.wishlist;
       this.purchasedGames = user.purchasedGames;
-      this.comments = user.comments;
+      this.profileAvatar = user.profileAvatar;
+      this.cardName = user.cardName;
+      this.cardNumber = user.cardNumber;
+      this.cardExpiration = user.cardExpiration;
+      this.cardCVV = user.cardCVV;
+
       this.createdAt = user.createdAt;
     }
   }
