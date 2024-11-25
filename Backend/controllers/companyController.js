@@ -3,8 +3,6 @@ const { CompanyDto } = require('../dtos/companyDto');
 const { Game } = require('../models/game');
 const nodemailer = require('nodemailer');
 
-
-// Get current company info
 const getCurrentCompany = async (req, res) => {
     try {
         const games = await Game.find({ company: req.user._id });
@@ -29,7 +27,6 @@ const getCurrentCompany = async (req, res) => {
     }
 };
 
-// Get all companies
 const getAllCompanies = async (req, res) => {
     try {
         const companies = await Company.find();
@@ -90,7 +87,6 @@ const updateCompanyProfile = async (req, res) => {
     }
 };
 
-// Forgot password
 const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -107,14 +103,14 @@ const forgotPassword = async (req, res) => {
 
         const temporaryPassword = crypto.randomBytes(2).toString('hex');
         
-        console.log('Temporary password generated:', temporaryPassword); // For debugging
+        console.log('Temporary password generated:', temporaryPassword); 
 
         if (!temporaryPassword) {
             throw new Error('Failed to generate temporary password');
         }
 
         user.password = temporaryPassword;
-        user.resetPasswordExpires = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // 31 days from now
+        user.resetPasswordExpires = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); 
 
         await user.save();
 

@@ -5,7 +5,6 @@ const { UserDto } = require('../dtos/userDto');
 const { RegisterDto } = require('../dtos/registerDto');
 const crypto = require('crypto');
 
-// Company registration
 const registerCompany = async (req, res) => {
     try {
         const { email, companyName, password, confirmPassword } = req.body;
@@ -37,7 +36,6 @@ const registerCompany = async (req, res) => {
     }
 };
 
-// User registration
 const registerUser = async (req, res) => {
     try {
         const { email, password, confirmPassword } = req.body;

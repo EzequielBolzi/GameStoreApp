@@ -45,19 +45,16 @@ const GameSchema = new mongoose.Schema({
   gamePhoto: { type: String, required: true}
 });
 
-//virtual to check if the game is currently on sale
+
 GameSchema.virtual('isOnSale').get(function() {
   return this.salePrice && this.saleEndDate && new Date() < this.saleEndDate;
 });
 
 GameSchema.pre('save', function(next) {
-  // Calculate sale price if there's a discount percentage
   if (this.discountPercentage > 0) {
-    // Round to 2 decimal places
     this.salePrice = Number((this.price * (1 - this.discountPercentage / 100)).toFixed(2));
   }
 
-  // Clear sale if it's expired
   if (this.saleEndDate && new Date() > this.saleEndDate) {
     this.salePrice = undefined;
     this.saleEndDate = undefined;
@@ -66,7 +63,6 @@ GameSchema.pre('save', function(next) {
   
   next();
 });
-// Ensure virtuals are included in JSON and object outputs
 GameSchema.set('toJSON', {
   virtuals: true,
   versionKey: false, 

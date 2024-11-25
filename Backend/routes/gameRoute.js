@@ -5,28 +5,20 @@ const auth = require('../middleware/auth');
 const roleAuth = require('../middleware/roleAuth');
 
 
-// Create a new game (only authenticated companies can create games)
 router.post('/', auth, roleAuth(['company']), createGame);
 
-// Get all games with filters
 router.get('/', getAllGames);
 
-// Get a specific game (public route)
 router.get('/:id', auth,getGame);
 
-// Update a game (only the owning company can update)
 router.patch('/:id', auth, roleAuth(['company']), updateGame);
 
-// Delete a game (only the owning company can delete)
 router.delete('/:id', auth, roleAuth(['company']), deleteGame);
 
-// Get Statistics  
 router.get('/statistics/:id', auth, roleAuth(['company']), getStatistics);
 
-// Set percentage of sale  
 router.post('/sales/:id', auth, roleAuth(['company']), setGameSale);
 
-// Delete sales  
 router.delete('/sales/:id', auth, roleAuth(['company']), removeSale);
 
 

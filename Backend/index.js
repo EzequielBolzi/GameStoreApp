@@ -19,28 +19,6 @@ app.use(cors({
     credentials: true, 
 }));
 
-// Set up socket.io with CORS configuration
-const io = socketIo(server, {
-    cors: {
-        origin: 'http://localhost:3001',  
-        methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH']        
-    }
-});
-
-// WebSocket connection handler
-io.on('connection', (socket) => {
-    console.log('A user connected');
-    
-    socket.on('message', (data) => {
-        console.log('Received message:', data);
-        socket.emit('response', 'Message received');  
-    });
-
-    // Handle user disconnection
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
-});
 
 // Middleware to parse JSON requests
 app.use(express.json());

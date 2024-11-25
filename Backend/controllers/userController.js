@@ -76,14 +76,14 @@ const forgotPassword = async (req, res) => {
 
         const temporaryPassword = crypto.randomBytes(2).toString('hex');
         
-        console.log('Temporary password generated:', temporaryPassword); // For debugging
+        console.log('Temporary password generated:', temporaryPassword);
 
         if (!temporaryPassword) {
             throw new Error('Failed to generate temporary password');
         }
 
         user.password = temporaryPassword;
-        user.resetPasswordExpires = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // 31 days from now
+        user.resetPasswordExpires = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); 
 
         await user.save();
 
@@ -196,7 +196,6 @@ const purchaseGame = async (req, res) => {
 
         const user = await User.findById(userId);
 
-        // Filter out games that the user already owns
         const alreadyOwnedGames = user.purchasedGames.filter(gameId => gameIds.includes(gameId));
         if (alreadyOwnedGames.length > 0) {
             return res.status(400).json({ 
@@ -205,7 +204,6 @@ const purchaseGame = async (req, res) => {
             });
         }
 
-        // Verify if user has stored payment info
         const hasStoredPaymentInfo = user.cardNumber && user.cardExpiration && user.cardCVV && user.cardName;
         let paymentInfo;
 
@@ -229,7 +227,6 @@ const purchaseGame = async (req, res) => {
             paymentInfo = { cardNumber, cardExpiration, cardCVV, cardName };
         }
 
-        // Validate payment info
         const cardNumberRegex = /^\d{16}$/;
         const cardExpirationRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
         const cardCVVRegex = /^\d{3,4}$/;
@@ -258,7 +255,6 @@ const purchaseGame = async (req, res) => {
             const purchaseAmount = game.isOnSale ? game.salePrice : game.price;
             totalAmount += purchaseAmount;
 
-            // Create and save purchase record
             const purchase = new Purchase({
                 user: userId,
                 game: gameId,
@@ -271,7 +267,6 @@ const purchaseGame = async (req, res) => {
             await purchase.save();
             purchases.push(purchase);
 
-            // Update game revenue and purchase count
             await Game.findByIdAndUpdate(
                 gameId,
                 {
@@ -283,14 +278,12 @@ const purchaseGame = async (req, res) => {
                 { new: true }
             );
 
-            // Add game view if it doesn't already exist
             const existingView = await GameView.findOne({ game: game._id, user: req.user._id });
             if (!existingView) {
                 await GameView.create({ game: game._id, user: req.user._id });
                 await Game.findByIdAndUpdate(game._id, { $inc: { uniqueViews: 1 } }, { new: true });
             }
 
-            // Update user's purchased games and remove from wishlist
             await User.findByIdAndUpdate(userId, { 
                 $addToSet: { purchasedGames: gameId },
                 $pull: { wishlist: gameId }
@@ -364,9 +357,9 @@ const removeGameFromWishlist = async (req, res) => {
             return res.status(400).json({ message: 'Game not found in your wishlist' });
         }
 
-        const game = await Game.findById(gameId); // Corrected this line to use gameId
+        const game = await Game.findById(gameId); 
         if (!game) {
-            return res.status(404).json({ message: 'Game not found' }); // Added this check
+            return res.status(404).json({ message: 'Game not found' });
         }
 
         user.wishlist = user.wishlist.filter(id => id.toString() !== gameId);
