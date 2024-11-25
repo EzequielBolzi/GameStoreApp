@@ -3,7 +3,7 @@ import './categories.css';
 import filterListData from '../data/filterListData';
 import GameCard from '../components/GameCard';
 
-function Categories({ games, reference, onGameDelete }) {
+function Categories({ games, reference, onGameDelete,onDiscountSave }) {
   const [data, setData] = useState(games);
   const [filters, setFilters] = useState(filterListData);
   const [text, setText] = useState('');
@@ -76,7 +76,7 @@ function Categories({ games, reference, onGameDelete }) {
         </div>
         <div className="row">
           {data.map((game) => (
-            <GameCard key={game.id} game={game} onGameDelete={onGameDelete} />
+            <GameCard key={game.id} game={game} onGameDelete={onGameDelete} onDiscountSave={onDiscountSave} />
           ))}
         </div>
       </div>

@@ -11,6 +11,5 @@ const CommentSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
   });
   
-  const Comment = mongoose.model('Comment', CommentSchema);
   
-  module.exports = { User, Company, Game, Comment };
+  module.exports = mongoose.model('Comment', CommentSchema);

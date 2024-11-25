@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoute');
 const companyRoutes = require('./routes/companyRoute'); 
 const gameRoutes = require('./routes/gameRoute');
 const authRoutes =  require('./routes/authRoute');
+const commentRoutes =  require('./routes/commentRoute');
 const app = express();
 const server = http.createServer(app); 
 
@@ -57,12 +58,12 @@ app.use("/api/companies", companyRoutes);
 // Game routes
 app.use('/api/games', gameRoutes);
 
+// Comment routes
+app.use('/api/comments', commentRoutes);
+
 // Auth routes
 app.use('/api/auths', authRoutes)
-// Simple test route
-app.get('/', (req, res) => {
-    res.send("Hello from Node API Server Update");
-});
+
 
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {

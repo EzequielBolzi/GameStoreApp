@@ -8,8 +8,10 @@ const RegisterPage = () => {
   const [registrationType, setRegistrationType] = useState('user'); 
 
   return (
+  
     <div className="max-w-2xl mx-auto p-4">
       {/* Toggle Button Group */}
+      <br></br>
       <div className="flex justify-center mb-8 bg-gray-100 p-1 rounded-lg">
         <button
           className={`flex items-center gap-2 px-6 py-3 rounded-md transition-all ${

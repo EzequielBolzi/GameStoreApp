@@ -3,8 +3,9 @@ import companyApi from '../../api/companyApi';
 import useAuth from '../../hooks/useAuth';
 import GameCard from '../../components/GameCard';
 import gameApi from '../../api/gameApi';
+import './companyGames.css';
 
-const CompanyGames = ({ reference, onSuccess, onGameDelete }) => {
+const CompanyGames = ({ reference, onSuccess, onGameDelete, onDiscountSave}) => {
   const { auth } = useAuth();
   const [games, setGames] = useState([]);
   const [error, setError] = useState(null);
@@ -18,19 +19,9 @@ const CompanyGames = ({ reference, onSuccess, onGameDelete }) => {
 
     try {
       const companyData = await companyApi.getCurrentCompany(authToken);
-      
-      if (!companyData) {
-        setError('No company data received');
-        return;
-      }
 
-      if (!Array.isArray(companyData.games)) {
-        setError('Invalid games data format');
-        return;
-      }
-
-      if (companyData.games.length === 0) {
-        setGames([]);
+      if (!companyData || !Array.isArray(companyData.games)) {
+        setError('No games or invalid data received');
         return;
       }
 
@@ -45,10 +36,7 @@ const CompanyGames = ({ reference, onSuccess, onGameDelete }) => {
       });
 
       const detailedGames = await Promise.all(gameDetailsPromises);
-      
-      const validGames = detailedGames.filter(game => game !== null);
-      
-      setGames(validGames);
+      setGames(detailedGames.filter((game) => game !== null));
       onSuccess();
     } catch (error) {
       setError(`Error fetching company games: ${error.message}`);
@@ -57,11 +45,11 @@ const CompanyGames = ({ reference, onSuccess, onGameDelete }) => {
 
   useEffect(() => {
     if (authToken) fetchCompanyGames();
-}, [games]);  
+  }, [authToken]); 
 
   const handleDeleteGame = async (gameId) => {
-    await onGameDelete(gameId);  
-    setGames((prevGames) => prevGames.filter((game) => game.id !== gameId)); 
+    await onGameDelete(gameId);
+    setGames((prevGames) => prevGames.filter((game) => game.id !== gameId));
   };
 
   if (error) {
@@ -76,24 +64,25 @@ const CompanyGames = ({ reference, onSuccess, onGameDelete }) => {
 
   return (
     <section id="companyGames" ref={reference}>
-        <div className="container">
-          {games.length > 0 ? (
-            <div className="row">
-              {games.map((game) => (
-                <GameCard
-                  key={game.id}
-                  game={game}
-                  onGameDelete={handleDeleteGame} // Pass the delete handler to GameCard
+      <div className="container">
+        {games.length > 0 ? (
+          <div className="row">
+            {games.map((game) => (
+              <GameCard
+                key={game.id}
+                game={game}
+                onGameDelete={handleDeleteGame}
+                onDiscountSave={onDiscountSave}
                 />
-              ))}
-            </div>
-          ) : (
-            <div className="no-games-message">
-              <h3>No games found</h3>
-              <p>Your company hasn't registered any games yet.</p>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="no-games-message">
+            <h3>No games found</h3>
+            <p>Your company hasn't registered any games yet.</p>
+          </div>
+        )}
+      </div>
     </section>
   );
 };

@@ -1,13 +1,15 @@
-// controllers/user.controller.js
+const mongoose = require('mongoose');
+
 
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
-const { Comment } = require('../models/comment');
+const  Comment  = require('../models/comment');
 const { Game, GameView } = require('../models/game');
 const User = require('../models/user');
 const { UserDto } = require('../dtos/userDto');
 const Purchase = require ('../models/purchase');
+
 
 const updateProfile = async (req, res) => {
     try {
@@ -108,13 +110,13 @@ const forgotPassword = async (req, res) => {
         res.status(500).json({ message: 'Error processing request', error: error.message });
     }
 };
-
 const createCommentAndRate = async (req, res) => {
     try {
-        const { gameId } = req.params;
+        const { gameId } = req.params;  
         const { comment, rating } = req.body;
         const userId = req.user._id;
 
+      
         if (!comment || rating === undefined || rating < 1 || rating > 5) {
             return res.status(400).json({ message: 'Invalid comment or rating' });
         }
@@ -129,24 +131,33 @@ const createCommentAndRate = async (req, res) => {
             return res.status(400).json({ message: 'You have already commented on this game' });
         }
 
+
         const newComment = new Comment({ user: userId, game: gameId, comment, rating });
         await newComment.save();
 
+ 
         game.comments.push(newComment._id);
+        await game.save();
+
         await User.findByIdAndUpdate(userId, { $push: { comments: newComment._id } });
+
 
         const allComments = await Comment.find({ game: gameId });
         game.averageRating = allComments.reduce((sum, comment) => sum + comment.rating, 0) / allComments.length;
+
 
         await game.save();
 
         res.status(201).json({ message: 'Comment and rating added successfully', comment: newComment });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Error in createCommentAndRate:', error); 
+        res.status(400).json({ message: error.message || 'An error occurred' });
     }
 };
-
 const deleteCommentAndRate = async (req, res) => {
+
+    const userId = req.user.id;
+
     try {
         const comment = await Comment.findById(req.params.commentId);
 
@@ -154,6 +165,10 @@ const deleteCommentAndRate = async (req, res) => {
             return res.status(403).json({ message: 'Unauthorized or comment not found' });
         }
 
+        if (comment.user.toString() !== userId) {
+            return res.status(403).json({ message: "You are not authorized to delete this comment." });
+          }
+          
         await comment.deleteOne();
 
         await User.findByIdAndUpdate(req.user._id, { $pull: { comments: comment._id } });

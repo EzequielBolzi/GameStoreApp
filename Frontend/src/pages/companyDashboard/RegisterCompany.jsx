@@ -192,6 +192,7 @@ const Register = () => {
 
                     <button disabled={!validName || !validPwd || !validMatch || !validCompanyName ? true : false}>Sign Up</button>
                 </form>
+                <br></br>
                 <p>
                     Already registered?<br />
                     <span className="line">

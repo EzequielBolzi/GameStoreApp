@@ -77,15 +77,20 @@ const gameApi = {
         }
     },
 
-    setGameSale: async (id, saleData) => {
+    setGameSale: async (id, saleData, authToken) => {
+        console.log('Sale Data:', saleData); // Log the saleData to confirm it's correct
         try {
-            const response = await axios.post(`${API_BASE_URL}/games/sales/${id}`, saleData);
+            const response = await axios.post(`${API_BASE_URL}/games/sales/${id}`, saleData, {
+                headers: {
+                    Authorization: `Bearer ${authToken}`, 
+                },
+            });
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error setting game sale');
         }
     },
-
+    
     removeSale: async (id) => {
         try {
             const response = await axios.delete(`${API_BASE_URL}/games/sales/${id}`);

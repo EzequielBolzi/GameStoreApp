@@ -3,7 +3,7 @@ import './home.css';
 import GameSwiper from '../components/GameSwiper';  
 import GameCard  from '../components/GameCard';
 
-function Home({ games, loading, error , reference, onGameDelete, onViewMoreClick}) {
+function Home({ games, loading, error , reference, onGameDelete, onViewMoreClick, onDiscountSave}) {
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -36,7 +36,7 @@ function Home({ games, loading, error , reference, onGameDelete, onViewMoreClick
             
             {
               gamesOnSale.slice(0, 4).map(game => (
-                <GameCard key={game.id} game={game} onGameDelete={onGameDelete} />
+                <GameCard key={game.id} game={game} onGameDelete={onGameDelete} onDiscountSave={onDiscountSave}/>
               ))
             }
           </div>

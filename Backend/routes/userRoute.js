@@ -17,9 +17,9 @@ router.patch('/profile', auth, roleAuth(['user']), updateProfile);
 
 
 // Comment and rate a game 
-router.post('/commendAndRate/:gameId', auth, roleAuth(['user']), createCommentAndRate);
+router.post('/commentAndRate/:gameId', auth, roleAuth(['user']), createCommentAndRate);
 
-router.delete('/commendAndRate/:commentId', auth, roleAuth(['user']), deleteCommentAndRate);
+router.delete('/commentAndRate/:commentId', auth, roleAuth(['user']), deleteCommentAndRate);
 
 // Reset password
 router.post('/forgot-password', forgotPassword);

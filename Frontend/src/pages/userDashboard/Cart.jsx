@@ -30,15 +30,18 @@ function Cart({ games, reference }) {
       setMessage('Your cart is empty.');
       return;
     }
-
+  
     setLoading(true);
     setMessage('');
-
-    try {
   
-        await userApi.purchaseGame(games.map(game => game.id), auth.accessToken);
-        
+    try {
+      await userApi.purchaseGame(games.map((game) => game.id), auth.accessToken);
+      
       setMessage('Purchase successful! Thank you for your order.');
+      setTimeout(() => {
+        window.location.reload();
+      }, 800); 
+      
     } catch (error) {
       setMessage(`Purchase failed: ${error.message}`);
     } finally {

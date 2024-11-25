@@ -1,11 +1,11 @@
-import React from 'react';
-import './header.css';
-import userImg from '../images/img_avatar.png';
-import { Link } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import React from "react";
+import "./header.css";
+import userImg from "../images/img_avatar.png";
+import { Link } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
-function Header({ toggleActive, username, isProfileUpdate, gamesCart, gamesLibrary }) {
-  const { auth, logout } = useAuth();  
+function Header({ toggleActive, username = "Guest", isProfileUpdate, gamesCart = [], gamesLibrary = [], isGameInformation }) {
+  const { auth, logout } = useAuth();
 
   if (isProfileUpdate) {
     return (
@@ -15,7 +15,7 @@ function Header({ toggleActive, username, isProfileUpdate, gamesCart, gamesLibra
             <img src={userImg} alt="User Avatar" />
             <div className="user">
               <span>{username}</span>
-              <Link to="/main">Volver al Home</Link>
+              <Link to="/main">Back to Home</Link>
             </div>
           </div>
         </div>
@@ -25,38 +25,81 @@ function Header({ toggleActive, username, isProfileUpdate, gamesCart, gamesLibra
 
   return (
     <header>
-      <a href="#" className="menu" onClick={toggleActive}>
+      <a
+        href="#"
+        className="menu"
+        onClick={(e) => {
+          e.preventDefault();
+          toggleActive();
+        }}
+        role="button"
+        aria-label="Toggle Menu"
+      >
+        { !isGameInformation && (
         <i className="bi bi-sliders"></i>
+        )}
       </a>
-      
+
       <div className="userItems">
-        <a href="#" className="icon"> 
-          <i className="bi bi-heart-fill"></i>
-          <span className="like">{gamesLibrary.length}</span>
-        </a>
-        <a href="#" className="icon">
-          <i className="bi bi-bag-fill"></i>
-          <span className="bag">{gamesCart.length}</span>
-        </a>
+        {auth.role === "user" && !isGameInformation && (
+          <>
+            <a href="#" className="icon" role="button" aria-label="View Favorites">
+              <i className="bi bi-heart-fill"></i>
+              <span className="like">{gamesLibrary.length}</span>
+            </a>
+            <a href="#" className="icon" role="button" aria-label="View Cart">
+              <i className="bi bi-bag-fill"></i>
+              <span className="bag">{gamesCart.length}</span>
+            </a>
+          </>
+        )}
+
         <div className="avatar">
-          <a href="#">
-            <img src={userImg} alt="User Image" />
+          <a href="#" role="button">
+            <img src={userImg} alt="User Avatar" />
           </a>
           <div className="user">
             <span>{username}</span>
-            {auth.role === 'company' && (
-              <Link to="/profile/update/company">Editar Perfil</Link>
+
+            {auth.role === "company" && !isGameInformation && (
+              <>
+                <Link to="/profile/update/company">Edit Profile</Link>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    logout();
+                    window.location.reload();
+                  }}
+                  className="sign-out"
+                  role="button"
+                >
+                  Sign Out
+                </a>
+              </>
             )}
-            {auth.role === 'user' && (
-              <Link to="/profile/update/user">Editar Perfil</Link>
+
+            {auth.role === "user" &&  !isGameInformation &&(
+              <>
+                <Link to="/profile/update/user">Edit Profile</Link>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    logout();
+                    window.location.reload();
+                  }}
+                  className="sign-out"
+                  role="button"
+                >
+                  Sign Out
+                </a>
+              </>
             )}
-            <Link 
-              to="#" 
-              style={{ fontSize: "12px" }} 
-              onClick={logout} 
-            >
-              Sign Out
-            </Link>
+
+            {isGameInformation && (
+              <Link to="/main">Back to Home</Link>
+            )}
           </div>
         </div>
       </div>

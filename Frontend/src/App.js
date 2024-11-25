@@ -11,6 +11,7 @@ import useAuth from './hooks/useAuth';
 const UpdateProfileCompany = lazy(() => import('./pages/companyDashboard/UpdateProfileCompany'));
 const UpdateProfileUser = lazy(() => import('./pages/userDashboard/UpdateProfileUser'));
 const Main = lazy(() => import('./pages/Main'));
+const GamePage = lazy(() => import('./pages/GamePage')); 
 
 export const AppContext = React.createContext();
 
@@ -60,6 +61,11 @@ function App() {
               <UpdateProfileUser/>
             </Suspense>
           } /> 
+          <Route path="/game/:gameId" element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <GamePage />
+            </Suspense>
+          } /> {/* Add GamePage here */}
         </Route>
 
         {/* Catch-all route */}

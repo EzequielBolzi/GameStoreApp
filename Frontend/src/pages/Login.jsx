@@ -16,6 +16,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errMsg, setErrMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);  // Track submission state
 
   useEffect(() => {
     userRef.current?.focus();
@@ -27,7 +28,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setIsSubmitting(true); // Disable button on submit
+
     try {
       const response = await authApi.login(
         { email, password },
@@ -37,26 +39,20 @@ const Login = () => {
         }
       );
       const accessToken = response.token;
-     
-      const role = response.company ? 'company' : 'user'; 
-  
+      const role = response.company ? 'company' : 'user';
 
       localStorage.setItem('token', JSON.stringify(accessToken));
       localStorage.setItem('role', role); 
-      
+
       setAuth({ 
         email, 
         role, 
         accessToken 
       });
-  
+
       setEmail('');
       setPassword('');
-      
-      console.log('Navigating to:', from);
-      
       navigate(from, { replace: true });
-      
     } catch (err) {
       if (!err?.response) {
         setErrMsg('No Server Response');
@@ -68,14 +64,20 @@ const Login = () => {
         setErrMsg('Login Failed');
       }
       errRef.current?.focus();
+    } finally {
+      setIsSubmitting(false);  // Re-enable the button after submission
     }
   };
 
   return (
     <section>
+      
       <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">
         {errMsg}
       </p>
+      <br></br>
+      <br></br>
+
       <h1>Sign In</h1>
       <form onSubmit={handleSubmit}>
         <label htmlFor="email">Email:</label>
@@ -97,12 +99,15 @@ const Login = () => {
           value={password}
           required
         />
-        <button type="submit">Sign In</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Signing In...' : 'Sign In'}
+        </button>
       </form>
+      <br></br>
       <p>
         Need an Account?<br />
         <span className="line">
-          <Link to="/register">Sign Up</Link>
+          <Link to="/register">Sign Up</Link> 
         </span>
       </p>
     </section>

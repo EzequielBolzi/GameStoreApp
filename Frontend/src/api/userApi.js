@@ -59,18 +59,29 @@ const userApi = {
         }
     },
 
-    commentAndRate: async (gameId, commentData) => {
+    commentAndRate: async (gameId, commentData, authToken) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/commendAndRate/${gameId}`, commentData);
+            const response = await axios.post(`${API_BASE_URL}/commentAndRate/${gameId}`, commentData,  
+                {
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                        'Content-Type': 'application/json' 
+                    }
+                });
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error commenting and rating game');
         }
     },
-
-    deleteCommentAndRate: async (commentId) => {
+    deleteCommentAndRate: async (commentId,authToken) => {
         try {
-            const response = await axios.delete(`${API_BASE_URL}/commendAndRate/${commentId}`);
+            const response = await axios.delete(`${API_BASE_URL}/commentAndRate/${commentId}`,  
+                {
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                        'Content-Type': 'application/json' 
+                    }
+                });
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Error deleting comment and rating');

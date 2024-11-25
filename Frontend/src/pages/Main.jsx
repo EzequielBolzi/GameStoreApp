@@ -34,6 +34,7 @@ function Main() {
     const companyGamesRef = useRef();
     const purchasedGamesRef = useRef();
 
+
     const sections = [
         {
             name: 'home',
@@ -145,6 +146,21 @@ function Main() {
         }
     };
 
+    const handleSaveDiscount = async (gameId, discountData) => {
+        try {
+            await gameApi.setGameSale(gameId, discountData, auth.accessToken);
+            setGames((prevGames) =>
+                prevGames.map((game) =>
+                    game.id === gameId ? { ...game, ...discountData, isOnSale: true } : game
+                )
+            );
+            handleFetchGames(); // Refresh the game list
+        } catch (error) {
+            window.alert("Failed to apply discount. Please try again.");
+            setError(`Error applying discount: ${error.message}`);
+        }
+    };
+    
     return (
         <main>
             {/* En side Menu tengo la asignacion para cada rol lo que tiene aut. ver */}
@@ -166,17 +182,27 @@ function Main() {
                             onGameDelete={handleGameDelete} 
                             onViewMoreClick={() => {
                               handleSectionActive('categories');
-                            }}                        />
+                            }}
+                            onDiscountSave={handleSaveDiscount}  
+                            />
                         <Categories 
                             games={games} 
                             reference={categoriesRef} 
                             onSuccess={handleFetchGames} 
                             onGameDelete={handleGameDelete} 
+                            onDiscountSave={handleSaveDiscount}  
+
                         />
                         <MyLibrary games={library} reference={libraryRef}/>
-                        <Cart games={cart} reference={cartRef}/>
+                        <Cart games={cart} reference={cartRef} />
                         <RegisterGame reference={regisGameRef} onSuccess={handleFetchGames}/>       
-                        <CompanyGames reference={companyGamesRef} onSuccess={handleFetchGames} onGameDelete={handleGameDelete}  />
+                        <CompanyGames 
+                                reference={companyGamesRef} 
+                                onSuccess={handleFetchGames} 
+                                onGameDelete={handleGameDelete}
+                                onDiscountSave={handleSaveDiscount}  
+ 
+                        />                        
                         <UserPurchasedGames reference={purchasedGamesRef}  />
                     </div>
                 </div>

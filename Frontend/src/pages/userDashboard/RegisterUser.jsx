@@ -196,6 +196,7 @@ const Register = () => {
 
                     <button disabled={!validEmail || !validUsername || !validPwd || !validMatch}>Register</button>
                 </form>
+                <br></br>
                 <p>
                     Already registered?<br />
                     <span className="line">
