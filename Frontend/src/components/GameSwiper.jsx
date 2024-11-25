@@ -42,7 +42,7 @@ function GameSwiper({ games }) {
     >
         
       {games.map((game) => (
-        <SwiperSlide key={game.id}> {/* Assuming `id` is unique */}
+        <SwiperSlide key={game.id}> 
         <div className="gameSlider">
             <img src={game.gamePhoto} alt="Game Image " />
             <div className="content">

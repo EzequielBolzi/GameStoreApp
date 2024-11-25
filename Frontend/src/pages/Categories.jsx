@@ -8,7 +8,6 @@ function Categories({ games, reference, onGameDelete,onDiscountSave }) {
   const [filters, setFilters] = useState(filterListData);
   const [text, setText] = useState('');
 
-  // Handle category filtering
   const handleFilterGames = (category) => {
     setFilters((prevFilters) =>
       prevFilters.map((filter) => {

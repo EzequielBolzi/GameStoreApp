@@ -154,7 +154,7 @@ function Main() {
                     game.id === gameId ? { ...game, ...discountData, isOnSale: true } : game
                 )
             );
-            handleFetchGames(); // Refresh the game list
+            handleFetchGames(); 
         } catch (error) {
             window.alert("Failed to apply discount. Please try again.");
             setError(`Error applying discount: ${error.message}`);
@@ -163,7 +163,7 @@ function Main() {
     
     return (
         <main>
-            {/* En side Menu tengo la asignacion para cada rol lo que tiene aut. ver */}
+            
             <SideMenu 
                 active={active}
                 sectionActive={handleSectionActive}

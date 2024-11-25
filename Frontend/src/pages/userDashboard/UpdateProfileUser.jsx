@@ -65,7 +65,6 @@ function UpdateProfileUser() {
       setError('');
       setSuccess('');
 
-      // Check if password and confirmPassword are not empty and match
       if (formData.password && formData.password !== formData.confirmPassword) {
         setError('Passwords do not match.');
         setLoading(false);
@@ -79,10 +78,9 @@ function UpdateProfileUser() {
             return;
         }
 
-        // If password is empty, remove it from the formData object before sending the request
         const { confirmPassword, ...dataToUpdate } = formData;
         if (!formData.password) {
-          delete dataToUpdate.password; // Don't send password if it's empty
+          delete dataToUpdate.password; 
         }
 
         await userApi.updateProfile(dataToUpdate, authToken); 

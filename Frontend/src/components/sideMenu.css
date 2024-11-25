@@ -66,7 +66,7 @@
     display: none;
   }
   
-  /* Responsive Styling */
+
   @media (max-width: 768px) {
     .sideMenu {
       position: fixed;

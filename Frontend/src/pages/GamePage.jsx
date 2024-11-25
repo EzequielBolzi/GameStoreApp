@@ -42,10 +42,10 @@ function GamePage() {
           return commentDetails;
         })
       );
-      setCommentData(comments.filter(comment => comment)); // Filter out any null responses
+      setCommentData(comments.filter(comment => comment)); 
     } catch (err) {
       setError("Failed to load comments.");
-      setCommentData([]); // Set empty array on error
+      setCommentData([]);
     }
   };
 
@@ -160,10 +160,8 @@ function GamePage() {
         prevComments.filter(comment => comment._id !== commentId)
       );
 
-      // Make the API call
       await userApi.deleteCommentAndRate(commentId, auth.accessToken);
 
-      // If we get here, the deletion was successful
       setGame(prevGame => ({
         ...prevGame,
         comments: prevGame.comments.filter(id => id !== commentId)

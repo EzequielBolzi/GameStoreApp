@@ -16,7 +16,7 @@
     display: grid;
     gap: 1rem;
     background-color: transparent;
-    margin: 0; /* Asegura que no haya márgenes extraños que puedan desfasar */
+    margin: 0; 
 }
 
 .registerGame label {
@@ -37,7 +37,7 @@
     color: #ffffff;
     font-family: 'Roboto', sans-serif;
     transition: all 0.3s ease;
-    box-sizing: border-box; /* Asegura que el padding no altere el tamaño total */
+    box-sizing: border-box; 
 }
 
 .registerGame input:focus,
@@ -122,7 +122,7 @@
     font-family: 'Roboto', sans-serif;
     transition: all 0.3s ease;
     cursor: pointer;
-    appearance: none; /* Removes default browser styling */
+    appearance: none; 
     -webkit-appearance: none;
     -moz-appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");

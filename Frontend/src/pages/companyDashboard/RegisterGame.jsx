@@ -90,23 +90,23 @@ const RegisterGame = ({ reference, onSuccess }) => {
                     directX,
                     storage
                 },
-                gamePhoto: gamePhoto || 'default.jpg' // Use the provided photo URL or a default one
+                gamePhoto: gamePhoto || 'default.jpg' 
             };
             await gameApi.createGame(gameData, auth.accessToken);
             setSuccess(true);
             resetForm();
-            onSuccess();  // Call onSuccess to refresh games
+            onSuccess();  
         } catch (error) {
             setErrMsg(error.response?.data?.message || "Failed to register game");
         }
     };
-    // Show a temporary success message and then reset
+
     useEffect(() => {
         let timeoutId;
         if (success) {
             timeoutId = setTimeout(() => {
                 resetForm();
-            }, 2000); // Reset after 2 seconds
+            }, 2000);
         }
         return () => {
             if (timeoutId) {
@@ -118,7 +118,7 @@ const RegisterGame = ({ reference, onSuccess }) => {
     return (
             <section id="registerGame" className="registerGame" ref={reference}>
                 <form onSubmit={handleSubmit}>
-                    {/* Name Field */}
+                
                     <label htmlFor="name">Game Name: <span>*</span></label>
                     <input
                         id="name"
@@ -128,7 +128,7 @@ const RegisterGame = ({ reference, onSuccess }) => {
                         required
                     />
                     
-                    {/* Category Dropdown */}
+       
                     <label htmlFor="category">Category: <span>*</span></label>
                     <select
                         id="category"
@@ -143,8 +143,7 @@ const RegisterGame = ({ reference, onSuccess }) => {
                             </option>
                         ))}
                     </select>
-                    
-                    {/* Description Field */}
+         
                     <label htmlFor="description">Description: <span>*</span></label>
                     <textarea
                         id="description"
@@ -153,7 +152,7 @@ const RegisterGame = ({ reference, onSuccess }) => {
                         required
                     />
 
-                    {/* Language Field */}
+              
                     <label htmlFor="language">Language: <span>*</span></label>
                     <input
                         type="text"
@@ -163,7 +162,7 @@ const RegisterGame = ({ reference, onSuccess }) => {
                         required
                     />
 
-                    {/* Price Field */}
+           
                     <label htmlFor="price">Price: <span>*</span></label>
                     <input
                         type="text"
@@ -173,7 +172,7 @@ const RegisterGame = ({ reference, onSuccess }) => {
                         required
                     />
                     
-                    {/* System Requirements Fields */}
+             
                     <h3>Minimum Requirements</h3>
                     <label htmlFor="system">System:</label>
                     <input type="text" id="system" onChange={(e) => setSystem(e.target.value)} value={system} />
@@ -193,7 +192,6 @@ const RegisterGame = ({ reference, onSuccess }) => {
                     <label htmlFor="storage">Storage:</label>
                     <input type="text" id="storage" onChange={(e) => setStorage(e.target.value)} value={storage} />
 
-                    {/* Game Photo URL */}
                     <label htmlFor="gamePhoto">Game Photo URL:</label>
                     <input
                         type="url"

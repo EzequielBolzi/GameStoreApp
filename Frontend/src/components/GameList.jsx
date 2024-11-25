@@ -50,7 +50,7 @@ const GameList = () => {
             <div key={game.id} className="game-item">
               <h3>{game.name}</h3>
               <p>{game.description}</p>
-              {/* Add more game details here */}
+          
             </div>
           ))
         ) : (

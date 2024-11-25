@@ -83,7 +83,6 @@ function GameCard({ game, onGameDelete, onDiscountSave }) {
   };
 
   const handleAddToCart = () => {
-    // Check if the game is already in the cart
     if (!cart.some((cartGame) => cartGame.id === game.id)) {
       setCart([...cart, game]);
     } else {

@@ -16,7 +16,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errMsg, setErrMsg] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);  // Track submission state
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   useEffect(() => {
     userRef.current?.focus();
@@ -28,7 +28,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true); // Disable button on submit
+    setIsSubmitting(true); 
 
     try {
       const response = await authApi.login(
@@ -65,7 +65,7 @@ const Login = () => {
       }
       errRef.current?.focus();
     } finally {
-      setIsSubmitting(false);  // Re-enable the button after submission
+      setIsSubmitting(false); 
     }
   };
 
